@@ -109,3 +109,78 @@ func TestSchemaGeneration(t *testing.T) {
 		})
 	}
 }
+
+type TestUserOneOf struct {
+	Tester    Tester    `json:"tester" jsonschema:"required"`
+	Developer Developer `json:"developer" jsonschema:"required"`
+}
+
+func (user TestUserOneOf) OneOf() []reflect.StructField {
+	tester, _ := reflect.TypeOf(user).FieldByName("Tester")
+	developer, _ := reflect.TypeOf(user).FieldByName("Developer")
+	return []reflect.StructField{
+		tester,
+		developer,
+	}
+}
+
+// Tester  struct
+type Tester struct {
+	Experience StringOrNull `json:"experience"`
+}
+
+// Developer  struct
+type Developer struct {
+	Experience StringOrNull `json:"experience" jsonschema:"minLength=1"`
+	Language   StringOrNull `json:"language" jsonschema:"required,pattern=\\S+"`
+}
+
+type StringOrNull struct {
+	String string
+	IsNull bool
+}
+
+func (p StringOrNull) OneOf() []reflect.StructField {
+	strings, _ := reflect.TypeOf(p).FieldByName("String")
+	return []reflect.StructField{
+		strings,
+		reflect.StructField{Type: nil},
+	}
+}
+
+var oneOfSchemaGenerationTests = []struct {
+	reflector *Reflector
+	fixture   string
+}{
+	{&Reflector{}, "fixtures/test_one_of_default.json"},
+}
+func TestOneOfSchemaGeneration(t *testing.T) {
+	for _, tt := range oneOfSchemaGenerationTests {
+		name := strings.TrimSuffix(filepath.Base(tt.fixture), ".json")
+		t.Run(name, func(t *testing.T) {
+			f, err := ioutil.ReadFile(tt.fixture)
+			if err != nil {
+				t.Errorf("ioutil.ReadAll(%s): %s", tt.fixture, err)
+				return
+			}
+
+			actualSchema := tt.reflector.Reflect(TestUserOneOf{})
+			expectedSchema := &Schema{}
+
+			if err := json.Unmarshal(f, expectedSchema); err != nil {
+				t.Errorf("json.Unmarshal(%s, %v): %s", tt.fixture, expectedSchema, err)
+				return
+			}
+
+			if !reflect.DeepEqual(actualSchema, expectedSchema) {
+				actualJSON, err := json.MarshalIndent(actualSchema, "", "  ")
+				if err != nil {
+					t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", actualSchema, err)
+					return
+				}
+				t.Errorf("reflector %+v wanted schema %s, got %s", tt.reflector, f, actualJSON)
+			}
+		})
+	}
+
+}

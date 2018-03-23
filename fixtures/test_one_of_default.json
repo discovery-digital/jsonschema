@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "$ref": "#/definitions/TestUserOneOf",
+  "definitions": {
+    "Developer": {
+      "required": [
+        "experience",
+        "language"
+      ],
+      "properties": {
+        "experience": {
+          "$ref": "#/definitions/StringOrNull",
+          "minLength": 1
+        },
+        "language": {
+          "$ref": "#/definitions/StringOrNull",
+          "pattern": "\\S+"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "StringOrNull": {
+      "required": [
+        "String",
+        "IsNull"
+      ],
+      "properties": {
+        "IsNull": {
+          "type": "boolean"
+        },
+        "String": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "TestUserOneOf": {
+      "required": [
+        "tester",
+        "developer"
+      ],
+      "properties": {
+        "developer": {
+          "$ref": "#/definitions/Developer"
+        },
+        "tester": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Tester"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/Tester"
+        },
+        {
+          "$ref": "#/definitions/Developer"
+        }
+      ]
+    },
+    "Tester": {
+      "required": [
+        "experience"
+      ],
+      "properties": {
+        "experience": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/StringOrNull"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    }
+  }
+}
