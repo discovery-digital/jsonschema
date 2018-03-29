@@ -133,6 +133,7 @@ type Tester struct {
 type Developer struct {
 	Experience StringOrNull `json:"experience" jsonschema:"minLength=1"`
 	Language   StringOrNull `json:"language" jsonschema:"required,pattern=\\S+"`
+	HardwareChoice Hardware  `json:"hardware"`
 }
 
 type StringOrNull struct {
@@ -140,11 +141,32 @@ type StringOrNull struct {
 	IsNull bool
 }
 
+type Hardware struct {
+	Memory int `json:"memory" jsonschema:"required"`
+}
+
+type Laptop struct {
+	Brand string `json:"brand" jsonschema:"pattern=^(apple|lenovo|dell)$"`
+	NeedTouchScreen bool `json:"need_touchscreen"`
+}
+
+type Desktop struct {
+	FormFactor string `json:"form_factor" jsonschema:"pattern=^(standard|micro|mini|nano)"`
+	NeedKeyboard bool `json:"need_keyboard"`
+}
+
 func (p StringOrNull) OneOf() []reflect.StructField {
 	strings, _ := reflect.TypeOf(p).FieldByName("String")
 	return []reflect.StructField{
 		strings,
 		reflect.StructField{Type: nil},
+	}
+}
+
+func (h Hardware) AndOneOf() []reflect.StructField {
+	return []reflect.StructField{
+		reflect.StructField{Type: reflect.TypeOf(Laptop{})},
+		reflect.StructField{Type: reflect.TypeOf(Hardware{})},
 	}
 }
 

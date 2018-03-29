@@ -13,7 +13,8 @@
     "Developer": {
       "required": [
         "experience",
-        "language"
+        "language",
+        "hardware"
       ],
       "properties": {
         "experience": {
@@ -27,6 +28,10 @@
             }
           ]
         },
+        "hardware": {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Hardware"
+        },
         "language": {
           "pattern": "\\S+",
           "oneOf": [
@@ -37,6 +42,44 @@
               "type": "null"
             }
           ]
+        }
+      },
+      "additionalProperties": false,
+      "type": "object"
+    },
+    "Hardware": {
+      "required": [
+        "memory"
+      ],
+      "properties": {
+        "memory": {
+          "type": "integer"
+        }
+      },
+      "additionalProperties": false,
+      "type": "object",
+      "oneOf": [
+        {
+          "$schema": "http://json-schema.org/draft-04/schema#",
+          "$ref": "#/definitions/Laptop"
+        },
+        {
+          "$ref": "#/definitions/Hardware"
+        }
+      ]
+    },
+    "Laptop": {
+      "required": [
+        "brand",
+        "need_touchscreen"
+      ],
+      "properties": {
+        "brand": {
+          "pattern": "^(apple|lenovo|dell)$",
+          "type": "string"
+        },
+        "need_touchscreen": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false,
