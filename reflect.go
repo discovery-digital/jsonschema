@@ -157,12 +157,7 @@ type oneOf interface {
 	OneOf() []reflect.StructField
 }
 
-type optionalString interface {
-	OptionalString() []reflect.StructField
-}
-
 var protoEnumType = reflect.TypeOf((*protoEnum)(nil)).Elem()
-var optionalStringType = reflect.TypeOf((*optionalString)(nil)).Elem()
 var oneOfType = reflect.TypeOf((*oneOf)(nil)).Elem()
 
 func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type) *Type {
@@ -177,14 +172,6 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 		return &Type{OneOf: []*Type{
 			{Type: "string"},
 			{Type: "integer"},
-		}}
-	}
-
-	// return oneOf realization for structures.
-	if t.Implements(optionalStringType) {
-		return &Type{OneOf: []*Type{
-			{Type: "string"},
-			{Type: "null"},
 		}}
 	}
 
