@@ -174,6 +174,18 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 			{Type: "integer"},
 		}}
 	}
+	// return anyOf realization for structures.
+	if t.Implements(oneOfType) {
+		oneOfList := make([]*Type, 0)
+		for _, oneType := range reflect.New(t).Interface().(oneOf).OneOf() {
+			if oneType.Type == nil {
+				oneOfList = append(oneOfList, &Type{Type: "null"})
+			} else {
+				oneOfList = append(oneOfList, r.reflectTypeToSchema(definitions, oneType.Type))
+			}
+		}
+		return &Type{OneOf: oneOfList}
+	}
 
 	// Defined format types for JSON Schema Validation
 	// RFC draft-wright-json-schema-validation-00, section 7.3
@@ -286,19 +298,6 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		st.Properties[name] = property
 		if required {
 			st.Required = append(st.Required, name)
-		}
-
-		// return oneOf realization for structures.
-		if t.Implements(oneOfType) {
-			oneOfList := make([]*Type, 0)
-			for _, oneType := range reflect.New(t).Interface().(oneOf).OneOf() {
-				if oneType.Type == nil {
-					oneOfList = append(oneOfList, &Type{Type: "null"})
-				} else {
-					oneOfList = append(oneOfList, r.reflectTypeToSchema(definitions, oneType.Type))
-				}
-			}
-			st.OneOf = oneOfList
 		}
 	}
 }
