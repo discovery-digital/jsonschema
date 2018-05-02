@@ -28,6 +28,7 @@ type Schema struct {
 	Definitions Definitions `json:"definitions,omitempty"`
 }
 
+// SchemaCondition holds data for if/then/else jsonschema statements
 type SchemaCondition struct {
 	If   reflect.StructField
 	Then interface{}
@@ -185,6 +186,12 @@ type oneOf interface {
 	OneOf() []reflect.StructField
 }
 
+//Implement IfThenElse() when condition needs to be used
+// {
+//    "if": { "properties": { "power": { "minimum": 9000 } } },
+//    "then": { "required": [ "disbelief" ] },
+//    "else": { "required": [ "confidence" ] }
+// }
 type ifThenElse interface {
 	IfThenElse() SchemaCondition
 }
@@ -339,8 +346,12 @@ func (r *Reflector) reflectCondition(definitions Definitions, s SchemaCondition,
 	}
 
 	t.If = condition
-	t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(s.Then))
-	t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(s.Else))
+	if reflect.TypeOf(s.Then) != nil {
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(s.Then))
+	}
+	if reflect.TypeOf(s.Else) != nil {
+		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(s.Else))
+	}
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
