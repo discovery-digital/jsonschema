@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"fmt"
 )
 
 type GrandfatherType struct {
@@ -105,7 +106,8 @@ func TestSchemaGeneration(t *testing.T) {
 
 			expectedSchema.Type = reconcileTypes(expectedSchema.Type)
 			expectedSchema.Definitions = reconcileEnumTypes(expectedSchema.Definitions)
-
+fmt.Println(actualSchema)
+fmt.Println(expectedSchema)
 			if !reflect.DeepEqual(actualSchema, expectedSchema) {
 				actualJSON, err := json.Marshal(actualSchema)
 				if err != nil {
