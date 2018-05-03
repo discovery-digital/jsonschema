@@ -10,7 +10,6 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"fmt"
 	"bytes"
 )
 
