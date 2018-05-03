@@ -117,55 +117,11 @@ func TestSchemaGeneration(t *testing.T) {
 }
 
 func sanitazeExpectedJson(expectedJSON []byte ) []byte{
-	a := strings.Replace(string(expectedJSON), "\n", "", -1)
-	b := strings.Replace(a, "\t", "", -1)
-	c := strings.Replace(b, "\\/", "/", -1)
-	cleanExpectedJSON := strings.Replace(c, " ", "", -1)
-	return []byte(cleanExpectedJSON)
-}
-
-// The marshaling of json into interface{} results in a mismatch when we DeepEqual the expected/actual schemas for enum
-// This coerces all float64 enums back to int
-func reconcileTypes(t *Type) *Type {
-	t.Definitions = reconcileEnumTypes(t.Definitions)
-	t.Properties = convertEnum(t.Properties)
-
-	return t
-}
-
-func reconcileEnumTypes(definitions Definitions) Definitions {
-	mismatched := convertDefinitions(definitions)
-	converted :=  convertEnum(mismatched)
-
-	return Definitions(converted)
-}
-
-func convertDefinitions(definitions Definitions) map[string]*Type {
-	return map[string]*Type(definitions)
-}
-
-func convertEnum(definitions map[string]*Type) map[string]*Type {
-	for _, v := range definitions {
-		if len(v.Definitions) > 0 {
-			d := convertDefinitions(v.Definitions)
-			v.Definitions = convertEnum(d)
-		}
-
-		if len(v.Properties) > 0 {
-			v.Properties = convertEnum(v.Properties)
-		}
-		if len(v.Enum) > 0{
-			fmt.Println(reflect.TypeOf(v.Enum[0]).Kind())
-		}
-
-		if len(v.Enum) > 0 && (reflect.TypeOf(v.Enum[0]).Kind() == reflect.Float64) {
-			for idx, val := range v.Enum {
-				v.Enum[idx] = val.(float64)
-			}
-		}
-	}
-
-	return definitions
+	expectedJSON = bytes.Replace(expectedJSON, []byte("\n"), []byte(""), -1)
+	expectedJSON = bytes.Replace(expectedJSON, []byte("\t"), []byte(""), -1)
+	expectedJSON = bytes.Replace(expectedJSON, []byte("\\/"), []byte("/"), -1)
+	expectedJSON = bytes.Replace(expectedJSON, []byte(" "), []byte(""), -1)
+	return expectedJSON
 }
 
 type TestUserOneOf struct {
