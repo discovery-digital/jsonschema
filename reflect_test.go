@@ -104,7 +104,7 @@ func TestSchemaGeneration(t *testing.T) {
 				t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", actualJSON, err)
 				return
 			}
-
+			actualJSON = sanitazeExpectedJson(actualJSON)
 			cleanExpectedJSON := sanitazeExpectedJson(f)
 
 			if !bytes.Equal(cleanExpectedJSON,actualJSON) {
