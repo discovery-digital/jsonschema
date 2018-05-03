@@ -269,6 +269,10 @@ type Application struct {
 	Type string `json:"type" jsonschema:"required"`
 }
 
+type ApplicationValidation struct {
+	Type string `json:"type" jsonschema:"enum=web"`
+}
+
 type WebApp struct {
 	Browser string `json:"browser"`
 }
@@ -278,11 +282,9 @@ type MobileApp struct {
 }
 
 func (app Application) IfThenElse() SchemaCondition {
+	conditionField, _ := reflect.TypeOf(ApplicationValidation{}).FieldByName("Type")
 	return SchemaCondition{
-		If: reflect.StructField{
-			Name: "type",
-			Tag:  `jsonschema:"enum=web"`,
-		},
+		If: conditionField,
 		Then: WebApp{},
 		Else: MobileApp{},
 	}

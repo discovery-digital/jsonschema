@@ -335,22 +335,22 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 	}
 }
 
-func (r *Reflector) reflectCondition(definitions Definitions, s SchemaCondition, t *Type) {
+func (r *Reflector) reflectCondition(definitions Definitions, sc SchemaCondition, t *Type) {
 	conditionSchema := Type{}
-	conditionSchema.structKeywordsFromTags(s.If)
+	conditionSchema.structKeywordsFromTags(sc.If)
 
 	condition := &Type{
 		Properties: map[string]*Type{
-			s.If.Name: &conditionSchema,
+			sc.If.Tag.Get("json"): &conditionSchema,
 		},
 	}
 
 	t.If = condition
-	if reflect.TypeOf(s.Then) != nil {
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(s.Then))
+	if reflect.TypeOf(sc.Then) != nil {
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Then))
 	}
-	if reflect.TypeOf(s.Else) != nil {
-		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(s.Else))
+	if reflect.TypeOf(sc.Else) != nil {
+		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Else))
 	}
 }
 
