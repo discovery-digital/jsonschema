@@ -11,6 +11,7 @@ import (
 	"testing"
 	"time"
 	"fmt"
+	"bytes"
 )
 
 type GrandfatherType struct {
@@ -73,7 +74,8 @@ type TestUser struct {
 	Email   string    `json:"email" jsonschema:"format=email"`
 
 	SecretNumber int  `json:"secret_number,omitempty" jsonschema:"enum=9|30|28|52"`
-	Sex		string    `json:"sex,omitempty" jsonschema:"enum=male|female|neither|whatever|other|not applicable"`
+	SecretFloatNumber float64  `json:"secret_float_number,omitempty" jsonschema:"enum=9.1|30.2|28.4|52.9"`
+	Sex		string    `json:"sex,omitempty" jsonschema:"enum=male|female|neither|whatever|other|not_applicable"`
 }
 
 var schemaGenerationTests = []struct {
@@ -97,34 +99,29 @@ func TestSchemaGeneration(t *testing.T) {
 			}
 
 			actualSchema := tt.reflector.Reflect(&TestUser{})
-			expectedSchema := &Schema{}
 
-			if err := json.Unmarshal(f, expectedSchema); err != nil {
-				t.Errorf("json.Unmarshal(%s, %v): %s", tt.fixture, expectedSchema, err)
+			actualJSON, err := json.Marshal(actualSchema)
+			if err != nil {
+				t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", actualJSON, err)
 				return
 			}
 
-			expectedSchema.Type = reconcileTypes(expectedSchema.Type)
-			expectedSchema.Definitions = reconcileEnumTypes(expectedSchema.Definitions)
-fmt.Println(actualSchema)
-fmt.Println(expectedSchema)
-			if !reflect.DeepEqual(actualSchema, expectedSchema) {
-				actualJSON, err := json.Marshal(actualSchema)
-				if err != nil {
-					t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", actualSchema, err)
-					return
-				}
+			cleanExpectedJSON := sanitazeExpectedJson(f)
 
-				expectedJSON, err := json.Marshal(expectedSchema)
-				if err != nil {
-					t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", expectedJSON, err)
-					return
-				}
+			if !bytes.Equal(cleanExpectedJSON,actualJSON) {
 
-				t.Errorf("reflector %+v wanted schema %s, got %s", tt.reflector, expectedJSON, actualJSON)
+				t.Errorf("reflector %+v wanted schema %s, got %s", tt.reflector, cleanExpectedJSON, actualJSON)
 			}
 		})
 	}
+}
+
+func sanitazeExpectedJson(expectedJSON []byte ) []byte{
+	a := strings.Replace(string(expectedJSON), "\n", "", -1)
+	b := strings.Replace(a, "\t", "", -1)
+	c := strings.Replace(b, "\\/", "/", -1)
+	cleanExpectedJSON := strings.Replace(c, " ", "", -1)
+	return []byte(cleanExpectedJSON)
 }
 
 // The marshaling of json into interface{} results in a mismatch when we DeepEqual the expected/actual schemas for enum
@@ -157,10 +154,13 @@ func convertEnum(definitions map[string]*Type) map[string]*Type {
 		if len(v.Properties) > 0 {
 			v.Properties = convertEnum(v.Properties)
 		}
+		if len(v.Enum) > 0{
+			fmt.Println(reflect.TypeOf(v.Enum[0]).Kind())
+		}
 
 		if len(v.Enum) > 0 && (reflect.TypeOf(v.Enum[0]).Kind() == reflect.Float64) {
 			for idx, val := range v.Enum {
-				v.Enum[idx] = int(val.(float64))
+				v.Enum[idx] = val.(float64)
 			}
 		}
 	}

@@ -429,9 +429,8 @@ func (t *Type) numbericKeywords(tags []string) {
 				enum := strings.Split(val, "|")
 				s := make([]interface{}, len(enum))
 				for k, v := range enum {
-					s[k], _ = strconv.ParseFloat(v, 64)
+					s[k], _ = strconv.Atoi(v)
 				}
-
 				t.Enum = s
 			}
 		} else {
@@ -461,7 +460,6 @@ func (t *Type) floatKeywords(tags []string) {
 				for k, v := range enum {
 					s[k], _ = strconv.ParseFloat(v, 64)
 				}
-
 				t.Enum = s
 			}
 		} else {
