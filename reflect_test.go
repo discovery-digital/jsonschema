@@ -72,9 +72,9 @@ type TestUser struct {
 	Age     int       `json:"age" jsonschema:"minimum=18,maximum=120,exclusiveMaximum=true,exclusiveMinimum=true"`
 	Email   string    `json:"email" jsonschema:"format=email"`
 
-	SecretNumber int  `json:"secret_number,omitempty" jsonschema:"enum=9|30|28|52"`
+	SecretNumber int    `json:"secret_number,omitempty" jsonschema:"enum=9|30|28|52"`
+	Sex          string `json:"sex,omitempty" jsonschema:"enum=male|female|neither|whatever|other|not applicable"`
 	SecretFloatNumber float64  `json:"secret_float_number,omitempty" jsonschema:"enum=9.1|30.2|28.4|52.9"`
-	Sex		string    `json:"sex,omitempty" jsonschema:"enum=male|female|neither|whatever|other|not_applicable"`
 }
 
 var schemaGenerationTests = []struct {
@@ -143,9 +143,9 @@ type Tester struct {
 
 // Developer  struct
 type Developer struct {
-	Experience StringOrNull `json:"experience" jsonschema:"minLength=1"`
-	Language   StringOrNull `json:"language" jsonschema:"required,pattern=\\S+"`
-	HardwareChoice Hardware  `json:"hardware"`
+	Experience     StringOrNull `json:"experience" jsonschema:"minLength=1"`
+	Language       StringOrNull `json:"language" jsonschema:"required,pattern=\\S+"`
+	HardwareChoice Hardware     `json:"hardware"`
 }
 
 type StringOrNull struct {
@@ -154,18 +154,18 @@ type StringOrNull struct {
 }
 
 type Hardware struct {
-	Brand string `json:"brand" jsonschema:"required,notEmpty"`
-	Memory int `json:"memory" jsonschema:"required"`
+	Brand  string `json:"brand" jsonschema:"required,notEmpty"`
+	Memory int    `json:"memory" jsonschema:"required"`
 }
 
 type Laptop struct {
-	Brand string `json:"brand" jsonschema:"pattern=^(apple|lenovo|dell)$"`
-	NeedTouchScreen bool `json:"need_touchscreen"`
+	Brand           string `json:"brand" jsonschema:"pattern=^(apple|lenovo|dell)$"`
+	NeedTouchScreen bool   `json:"need_touchscreen"`
 }
 
 type Desktop struct {
-	FormFactor string `json:"form_factor" jsonschema:"pattern=^(standard|micro|mini|nano)"`
-	NeedKeyboard bool `json:"need_keyboard"`
+	FormFactor   string `json:"form_factor" jsonschema:"pattern=^(standard|micro|mini|nano)"`
+	NeedKeyboard bool   `json:"need_keyboard"`
 }
 
 func (p StringOrNull) OneOf() []reflect.StructField {
@@ -189,6 +189,7 @@ var oneOfSchemaGenerationTests = []struct {
 }{
 	{&Reflector{}, "fixtures/test_one_of_default.json"},
 }
+
 func TestOneOfSchemaGeneration(t *testing.T) {
 	for _, tt := range oneOfSchemaGenerationTests {
 		name := strings.TrimSuffix(filepath.Base(tt.fixture), ".json")
@@ -220,3 +221,64 @@ func TestOneOfSchemaGeneration(t *testing.T) {
 
 }
 
+type Application struct {
+	Type string `json:"type" jsonschema:"required"`
+}
+
+type ApplicationValidation struct {
+	Type string `json:"type" jsonschema:"enum=web"`
+}
+
+type WebApp struct {
+	Browser string `json:"browser"`
+}
+
+type MobileApp struct {
+	Device string `json:"device"`
+}
+
+func (app Application) IfThenElse() SchemaCondition {
+	conditionField, _ := reflect.TypeOf(ApplicationValidation{}).FieldByName("Type")
+	return SchemaCondition{
+		If: conditionField,
+		Then: WebApp{},
+		Else: MobileApp{},
+	}
+}
+
+var ifThenElseSchemaGenerationTests = []struct {
+	reflector *Reflector
+	fixture   string
+}{
+	{&Reflector{}, "fixtures/if_then_else.json"},
+}
+
+func TestIfThenElseSchemaGeneration(t *testing.T) {
+	for _, tt := range ifThenElseSchemaGenerationTests {
+		name := strings.TrimSuffix(filepath.Base(tt.fixture), ".json")
+		t.Run(name, func(t *testing.T) {
+			f, err := ioutil.ReadFile(tt.fixture)
+			if err != nil {
+				t.Errorf("ioutil.ReadAll(%s): %s", tt.fixture, err)
+				return
+			}
+
+			actualSchema := tt.reflector.Reflect(Application{})
+			expectedSchema := &Schema{}
+
+			if err := json.Unmarshal(f, expectedSchema); err != nil {
+				t.Errorf("json.Unmarshal(%s, %v): %s", tt.fixture, expectedSchema, err)
+				return
+			}
+
+			if !reflect.DeepEqual(actualSchema, expectedSchema) {
+				actualJSON, err := json.MarshalIndent(actualSchema, "", "  ")
+				if err != nil {
+					t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", actualSchema, err)
+					return
+				}
+				t.Errorf("reflector %+v wanted schema %s, got %s", tt.reflector, f, actualJSON)
+			}
+		})
+	}
+}
