@@ -104,8 +104,8 @@ func TestSchemaGeneration(t *testing.T) {
 				t.Errorf("json.MarshalIndent(%v, \"\", \"  \"): %v", actualJSON, err)
 				return
 			}
-			actualJSON = sanitazeExpectedJson(actualJSON)
-			cleanExpectedJSON := sanitazeExpectedJson(f)
+			actualJSON = sanitizeExpectedJson(actualJSON)
+			cleanExpectedJSON := sanitizeExpectedJson(f)
 
 			if !bytes.Equal(cleanExpectedJSON,actualJSON) {
 
@@ -115,12 +115,11 @@ func TestSchemaGeneration(t *testing.T) {
 	}
 }
 
-func sanitazeExpectedJson(expectedJSON []byte ) []byte{
-	expectedJSON = bytes.Replace(expectedJSON, []byte("\n"), []byte(""), -1)
-	expectedJSON = bytes.Replace(expectedJSON, []byte("\t"), []byte(""), -1)
-	expectedJSON = bytes.Replace(expectedJSON, []byte("\\/"), []byte("/"), -1)
-	expectedJSON = bytes.Replace(expectedJSON, []byte(" "), []byte(""), -1)
-	return expectedJSON
+func sanitizeExpectedJson(expectedJSON []byte) []byte {
+	var js interface{}
+	json.Unmarshal(expectedJSON, &js)
+	clean, _ := json.Marshal(js)
+	return clean
 }
 
 type TestUserOneOf struct {
