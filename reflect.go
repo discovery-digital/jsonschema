@@ -8,7 +8,6 @@ package jsonschema
 
 import (
 	"encoding/json"
-	"fmt"
 	"net"
 	"net/url"
 	"reflect"
@@ -38,7 +37,7 @@ type SchemaCondition struct {
 
 // SchemaSwitch holds data for emulating switch case over some field value
 type SchemaSwitch struct {
-	ByField reflect.StructField
+	ByField string
 	Cases   map[string]interface{}
 }
 
@@ -373,8 +372,17 @@ func (r *Reflector) reflectCondition(definitions Definitions, sc SchemaCondition
 func (r *Reflector) reflectCase(definitions Definitions, sc SchemaSwitch) *Type {
 	casesList := make([]*Type, 0)
 	for key, value := range sc.Cases {
-		fmt.Println(key, value)
-		casesList = append(casesList, &Type{})
+		t := &Type{}
+		t.If = &Type{
+			Properties: map[string]*Type{
+				sc.ByField: &Type{
+					Enum: []interface{}{key},
+				},
+			},
+		}
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value))
+		t.Else = t.If
+		casesList = append(casesList, t)
 	}
 	return &Type{OneOf: casesList}
 }

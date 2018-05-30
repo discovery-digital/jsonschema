@@ -1,7 +1,5 @@
 package jsonschema
 
-import "reflect"
-
 type ExampleCase struct {
 	Type string `json:"type" jsonschema:"required;enum="int|string|bool"`
 }
@@ -24,9 +22,8 @@ func (ex ExampleCase) Case() SchemaSwitch {
 	cases["string"] = StringPayload{}
 	cases["bool"] = BoolPayload{}
 
-	ByField, _ := reflect.TypeOf(ExampleCase{}).FieldByName("Type")
 	return SchemaSwitch{
-		ByField: ByField,
+		ByField: "type",
 		Cases:   cases,
 	}
 }
