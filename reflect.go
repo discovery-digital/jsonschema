@@ -340,10 +340,6 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 		condition := reflect.New(t).Interface().(ifThenElse).IfThenElse()
 		r.reflectCondition(definitions, condition, st)
 	}
-	if t.Implements(schemaCaseType) {
-		schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
-		return r.reflectCase(definitions, schemaSwitch)
-	}
 
 	return &Type{
 		Version: Version,
@@ -369,7 +365,7 @@ func (r *Reflector) reflectCondition(definitions Definitions, sc SchemaCondition
 	}
 }
 
-func (r *Reflector) reflectCase(definitions Definitions, sc SchemaSwitch) *Type {
+func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
 	casesList := make([]*Type, 0)
 	for key, value := range sc.Cases {
 		t := &Type{}
@@ -384,7 +380,7 @@ func (r *Reflector) reflectCase(definitions Definitions, sc SchemaSwitch) *Type 
 		t.Else = t.If
 		casesList = append(casesList, t)
 	}
-	return &Type{OneOf: casesList}
+	return casesList
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
@@ -415,6 +411,11 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		if t.Implements(andOneOfType) {
 			s := reflect.New(t).Interface().(andOneOf).AndOneOf()
 			st.OneOf = r.getOneOfList(definitions, s)
+		}
+
+		if t.Implements(schemaCaseType) {
+			schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
+			st.OneOf = r.reflectCases(definitions, schemaSwitch)
 		}
 	}
 }
