@@ -553,7 +553,7 @@ func (t *Type) floatKeywords(tags []string) {
 	}
 }
 
-// read struct tags for array type keywodks
+// read struct tags for array type keywods
 func (t *Type) arrayKeywords(tags []string) {
 	for _, tag := range tags {
 		nameValue := strings.Split(tag, "=")
