@@ -22,6 +22,30 @@
                         "properties": {
                             "type": {
                                 "enum": [
+                                    "bool"
+                                ]
+                            }
+                        }
+                    },
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "bool"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/jsonschema.BoolPayload",
+                        "$schema": "http://json-schema.org/draft-07/schema#"
+                    }
+                },
+                {
+                    "else": {
+                        "properties": {
+                            "type": {
+                                "enum": [
                                     "int"
                                 ]
                             }
@@ -62,30 +86,6 @@
                     },
                     "then": {
                         "$ref": "#/definitions/jsonschema.StringPayload",
-                        "$schema": "http://json-schema.org/draft-07/schema#"
-                    }
-                },
-                {
-                    "else": {
-                        "properties": {
-                            "type": {
-                                "enum": [
-                                    "bool"
-                                ]
-                            }
-                        }
-                    },
-                    "if": {
-                        "properties": {
-                            "type": {
-                                "enum": [
-                                    "bool"
-                                ]
-                            }
-                        }
-                    },
-                    "then": {
-                        "$ref": "#/definitions/jsonschema.BoolPayload",
                         "$schema": "http://json-schema.org/draft-07/schema#"
                     }
                 }

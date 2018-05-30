@@ -407,16 +407,16 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 			st.Required = append(st.Required, name)
 		}
 
-		// Append oneOf array to existing object type when AndOneOf() is implemented
-		if t.Implements(andOneOfType) {
-			s := reflect.New(t).Interface().(andOneOf).AndOneOf()
-			st.OneOf = r.getOneOfList(definitions, s)
-		}
+	}
+	// Append oneOf array to existing object type when AndOneOf() is implemented
+	if t.Implements(andOneOfType) {
+		s := reflect.New(t).Interface().(andOneOf).AndOneOf()
+		st.OneOf = r.getOneOfList(definitions, s)
+	}
 
-		if t.Implements(schemaCaseType) {
-			schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
-			st.OneOf = r.reflectCases(definitions, schemaSwitch)
-		}
+	if t.Implements(schemaCaseType) {
+		schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
+		st.OneOf = r.reflectCases(definitions, schemaSwitch)
 	}
 }
 
