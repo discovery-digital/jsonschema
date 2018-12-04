@@ -47,9 +47,7 @@
           "items": {
             "type": "integer"
           },
-          "type": "array",
-          "minItems": 2,
-          "maxItems": 2
+          "type": "array"
         },
         "grand": {
           "$ref": "#/definitions/jsonschema.GrandfatherType",
@@ -151,9 +149,7 @@
       "items": {
         "type": "integer"
       },
-      "type": "array",
-      "minItems": 2,
-      "maxItems": 2
+      "type": "array"
     },
     "grand": {
       "$ref": "#/definitions/jsonschema.GrandfatherType",

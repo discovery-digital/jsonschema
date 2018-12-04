@@ -223,8 +223,7 @@ var oneOfType = reflect.TypeOf((*oneOf)(nil)).Elem()
 var ifThenElseType = reflect.TypeOf((*ifThenElse)(nil)).Elem()
 var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
 var minItemsType = reflect.TypeOf((*minItems)(nil)).Elem()
-
-// var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
+var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
 func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.Type) (schema *Type) {
 	// Already added to definitions?
@@ -301,8 +300,11 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.T
 			returnType.MinItems = t.Len()
 			returnType.MaxItems = returnType.MinItems
 		}
-		if t.Kind() == reflect.Slice && t != byteSliceType {
+
+		if t.Kind() == reflect.Slice && t != byteSliceType && st.Implements(minItemsType) {
 			returnType.MinItems = reflect.New(st).Interface().(minItems).MinItems()
+		}
+		if t.Kind() == reflect.Slice && t != byteSliceType && st.Implements(maxItemsType) {
 			returnType.MaxItems = reflect.New(st).Interface().(maxItems).MaxItems()
 		}
 		switch t {

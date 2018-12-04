@@ -1,10 +1,10 @@
 package jsonschema
 
-func (st *SliceTestType) MinItems() int {
+func (st SliceTestType) MinItems() int {
 	return 2
 }
 
-func (st *SliceTestType) MaxItems() int {
+func (st SliceTestType) MaxItems() int {
 	return 2
 }
 
