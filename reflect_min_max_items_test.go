@@ -8,6 +8,4 @@ func (st SliceTestType) MaxItems() int {
 	return 2
 }
 
-type SliceTestType struct {
-	TestSlice []string `json:"testSlice"`
-}
+type SliceTestType []string

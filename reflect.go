@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"fmt"
 )
 
 // Version is the JSON Schema version.
@@ -145,7 +146,7 @@ func (r *Reflector) ReflectFromType(t reflect.Type) *Schema {
 	}
 
 	s := &Schema{
-		Type:        r.reflectTypeToSchema(definitions, t, nil),
+		Type:        r.reflectTypeToSchema(definitions, t),
 		Definitions: definitions,
 	}
 	return s
@@ -225,7 +226,7 @@ var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
 var minItemsType = reflect.TypeOf((*minItems)(nil)).Elem()
 var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
-func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.Type) (schema *Type) {
+func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type) (schema *Type) {
 	// Already added to definitions?
 	if _, ok := definitions[t.Name()]; ok {
 		return &Type{Ref: "#/definitions/" + getPackageNameFromPath(t.PkgPath()) + "." + t.Name()}
@@ -287,7 +288,7 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.T
 		// It should be added to the object properties spec.
 		if t.Elem().Kind() != reflect.Interface {
 			rt.PatternProperties = map[string]*Type{
-				".*": r.reflectTypeToSchema(definitions, t.Elem(), st),
+				".*": r.reflectTypeToSchema(definitions, t.Elem()),
 			}
 			delete(rt.PatternProperties, "additionalProperties")
 		}
@@ -300,12 +301,16 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.T
 			returnType.MinItems = t.Len()
 			returnType.MaxItems = returnType.MinItems
 		}
-
-		if t.Kind() == reflect.Slice && t != byteSliceType && st.Implements(minItemsType) {
-			returnType.MinItems = reflect.New(st).Interface().(minItems).MinItems()
+		
+		if t.Kind() == reflect.Slice && t != byteSliceType && t.Implements(minItemsType) {
+			fmt.Println(t.Kind(), t.Implements(minItemsType))
+			returnType.MinItems = reflect.New(t).Interface().(minItems).MinItems()
+			fmt.Println("min: ", returnType.MinItems)
 		}
-		if t.Kind() == reflect.Slice && t != byteSliceType && st.Implements(maxItemsType) {
-			returnType.MaxItems = reflect.New(st).Interface().(maxItems).MaxItems()
+		if t.Kind() == reflect.Slice && t != byteSliceType && t.Implements(maxItemsType) {
+			fmt.Println(t.Kind(), t.Implements(minItemsType))
+			returnType.MaxItems = reflect.New(t).Interface().(maxItems).MaxItems()
+			fmt.Println("max: ", returnType.MaxItems)
 		}
 		switch t {
 		case byteSliceType:
@@ -314,7 +319,7 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.T
 			return returnType
 		default:
 			returnType.Type = "array"
-			returnType.Items = r.reflectTypeToSchema(definitions, t.Elem(), st)
+			returnType.Items = r.reflectTypeToSchema(definitions, t.Elem())
 			return returnType
 		}
 
@@ -338,7 +343,7 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t, st reflect.T
 		return &Type{Type: "string"}
 
 	case reflect.Ptr:
-		return r.reflectTypeToSchema(definitions, t.Elem(), st)
+		return r.reflectTypeToSchema(definitions, t.Elem())
 	}
 	panic("unsupported type " + t.String())
 }
@@ -375,10 +380,10 @@ func (r *Reflector) reflectCondition(definitions Definitions, sc SchemaCondition
 	}
 
 	if reflect.TypeOf(sc.Then) != nil {
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Then), nil)
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Then))
 	}
 	if reflect.TypeOf(sc.Else) != nil {
-		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Else), nil)
+		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Else))
 	}
 }
 
@@ -393,7 +398,7 @@ func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Ty
 				},
 			},
 		}
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value), nil)
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value))
 		t.Else = t.If
 		casesList = append(casesList, t)
 	}
@@ -417,7 +422,7 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		if name == "" {
 			continue
 		}
-		property := r.reflectTypeToSchema(definitions, f.Type, t)
+		property := r.reflectTypeToSchema(definitions, f.Type)
 		property.structKeywordsFromTags(r.getJSONSchemaTags(f, t))
 		st.Properties[name] = property
 		if required {
@@ -660,7 +665,7 @@ func (r *Reflector) getOneOfList(definitions Definitions, s []reflect.StructFiel
 		if oneType.Type == nil {
 			oneOfList = append(oneOfList, &Type{Type: "null"})
 		} else {
-			oneOfList = append(oneOfList, r.reflectTypeToSchema(definitions, oneType.Type, nil))
+			oneOfList = append(oneOfList, r.reflectTypeToSchema(definitions, oneType.Type))
 		}
 	}
 	return oneOfList
