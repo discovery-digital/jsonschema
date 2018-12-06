@@ -14,7 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"fmt"
 )
 
 // Version is the JSON Schema version.
@@ -301,16 +300,12 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 			returnType.MinItems = t.Len()
 			returnType.MaxItems = returnType.MinItems
 		}
-		
+
 		if t.Kind() == reflect.Slice && t != byteSliceType && t.Implements(minItemsType) {
-			fmt.Println(t.Kind(), t.Implements(minItemsType))
 			returnType.MinItems = reflect.New(t).Interface().(minItems).MinItems()
-			fmt.Println("min: ", returnType.MinItems)
 		}
 		if t.Kind() == reflect.Slice && t != byteSliceType && t.Implements(maxItemsType) {
-			fmt.Println(t.Kind(), t.Implements(minItemsType))
 			returnType.MaxItems = reflect.New(t).Interface().(maxItems).MaxItems()
-			fmt.Println("max: ", returnType.MaxItems)
 		}
 		switch t {
 		case byteSliceType:
