@@ -591,6 +591,7 @@ func (t *Type) arrayKeywords(tags []string) {
 	}
 }
 
+// `json:"-"` and `json:"omitempty"` make the field optional
 func requiredFromJSONTags(tags []string) bool {
 	if ignoredByJSONTags(tags) {
 		return false
@@ -604,6 +605,7 @@ func requiredFromJSONTags(tags []string) bool {
 	return true
 }
 
+// Setting RequiredFromJSONSchemaTags to true allows usage of the `required` tag to make a field required
 func requiredFromJSONSchemaTags(tags []string) bool {
 	if ignoredByJSONSchemaTags(tags) {
 		return false
@@ -614,6 +616,20 @@ func requiredFromJSONSchemaTags(tags []string) bool {
 		}
 	}
 	return false
+}
+
+// `jsonschema:"optional"` will make the field optional
+//
+// The use case for this is when you are taking json input where validation on a field should be optional
+// but you do not want to declare `omitempty` because you serialize the struct to json to a third party
+// and the fields must exist (such as a field that's an int)
+func remainsRequiredFromJSONSchemaTags(tags []string, currentlyRequired bool) bool {
+	for _, tag := range tags {
+		if tag == "optional" {
+			return false
+		}
+	}
+	return currentlyRequired
 }
 
 func ignoredByJSONTags(tags []string) bool {
@@ -646,6 +662,8 @@ func (r *Reflector) reflectFieldName(f reflect.StructField, t reflect.Type) (str
 	if r.RequiredFromJSONSchemaTags {
 		required = requiredFromJSONSchemaTags(jsonSchemaTags)
 	}
+
+	required = remainsRequiredFromJSONSchemaTags(jsonSchemaTags, required)
 
 	if jsonTags[0] != "" {
 		name = jsonTags[0]
