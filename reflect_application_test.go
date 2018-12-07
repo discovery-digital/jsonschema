@@ -3,7 +3,7 @@ package jsonschema
 import "reflect"
 
 type Application struct {
-	Type string `json:"type" jsonschema:"required"`
+	Type string `json:"type"`
 }
 
 type ApplicationValidation struct {

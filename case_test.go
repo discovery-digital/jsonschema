@@ -1,7 +1,7 @@
 package jsonschema
 
 type ExampleCase struct {
-	Type string `json:"type" jsonschema:"required;enum="bool|int|string"`
+	Type string `json:"type" jsonschema:"optional"`
 }
 
 type IntPayload struct {

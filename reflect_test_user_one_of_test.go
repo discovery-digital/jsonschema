@@ -3,8 +3,8 @@ package jsonschema
 import "reflect"
 
 type TestUserOneOf struct {
-	Tester    Tester    `json:"tester" jsonschema:"required"`
-	Developer Developer `json:"developer" jsonschema:"required"`
+	Tester    Tester    `json:"tester"`
+	Developer Developer `json:"developer"`
 }
 
 func (user TestUserOneOf) OneOf() []reflect.StructField {
@@ -24,7 +24,7 @@ type Tester struct {
 // Developer  struct
 type Developer struct {
 	Experience     StringOrNull `json:"experience" jsonschema:"minLength=1"`
-	Language       StringOrNull `json:"language" jsonschema:"required,pattern=\\S+"`
+	Language       StringOrNull `json:"language" jsonschema:"pattern=\\S+"`
 	HardwareChoice Hardware     `json:"hardware"`
 }
 
@@ -34,8 +34,8 @@ type StringOrNull struct {
 }
 
 type Hardware struct {
-	Brand  string `json:"brand" jsonschema:"required,notEmpty"`
-	Memory int    `json:"memory" jsonschema:"required"`
+	Brand  string `json:"brand" jsonschema:"notEmpty"`
+	Memory int    `json:"memory"`
 }
 
 type Laptop struct {

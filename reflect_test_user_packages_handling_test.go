@@ -8,8 +8,8 @@ import (
 )
 
 type TestUserPackage struct {
-	Tester    TesterPackage    `json:"tester" jsonschema:"required"`
-	Developer DeveloperPackage `json:"developer" jsonschema:"required"`
+	Tester    TesterPackage    `json:"tester"`
+	Developer DeveloperPackage `json:"developer"`
 }
 
 func (user TestUserPackage) OneOf() []reflect.StructField {
@@ -29,7 +29,7 @@ type TesterPackage struct {
 // Developer  struct
 type DeveloperPackage struct {
 	Experience     StringOrNull1 `json:"experience" jsonschema:"minLength=1"`
-	Language       StringOrNull1 `json:"language" jsonschema:"required,pattern=\\S+"`
+	Language       StringOrNull1 `json:"language" jsonschema:"pattern=\\S+"`
 	HardwareChoice v1.Hardware   `json:"hardware"`
 	HardwareChoic  v2.Hardware   `json:"hardware1"`
 }
