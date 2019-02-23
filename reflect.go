@@ -295,6 +295,16 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 		return rt
 
 	case reflect.Slice, reflect.Array:
+		// encoding/json.RawMessage is an alias for a bytes slice but need to be handled like a map
+		if t.Name() == "RawMessage" && t.PkgPath() == "encoding/json" {
+			rt := &Type{
+				Type:              "object",
+				PatternProperties: nil,
+			}
+
+			return rt
+		}
+
 		returnType := &Type{}
 		if t.Kind() == reflect.Array {
 			returnType.MinItems = t.Len()
