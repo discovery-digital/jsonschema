@@ -1,7 +1,11 @@
-package jsonschema
+package jsonschema_test
 
-import "reflect"
+import (
+	"github.com/discovery-digital/jsonschema"
+	"reflect"
+)
 
+// These are models used for the subschema_conditional test, but the actual test cases are in reflect_test.go
 type Application struct {
 	Type string `json:"type"`
 }
@@ -18,11 +22,12 @@ type MobileApp struct {
 	Device string `json:"device"`
 }
 
-func (app Application) IfThenElse() SchemaCondition {
+func (app Application) IfThenElse() jsonschema.SchemaCondition {
 	conditionField, _ := reflect.TypeOf(ApplicationValidation{}).FieldByName("Type")
-	return SchemaCondition{
+	return jsonschema.SchemaCondition{
 		If:   conditionField,
 		Then: WebApp{},
 		Else: MobileApp{},
 	}
 }
+

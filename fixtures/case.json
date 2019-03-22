@@ -1,8 +1,8 @@
 {
-    "$ref": "#/definitions/jsonschema.ExampleCase",
+    "$ref": "#/definitions/jsonschema_test.ExampleCase",
     "$schema": "http://json-schema.org/draft-07/schema#",
     "definitions": {
-        "jsonschema.BoolPayload": {
+        "jsonschema_test.BoolPayload": {
             "additionalProperties": false,
             "properties": {
                 "payload": {
@@ -14,7 +14,7 @@
             ],
             "type": "object"
         },
-        "jsonschema.ExampleCase": {
+        "jsonschema_test.ExampleCase": {
             "additionalProperties": false,
             "oneOf": [
                 {
@@ -37,7 +37,7 @@
                         }
                     },
                     "then": {
-                        "$ref": "#/definitions/jsonschema.BoolPayload",
+                        "$ref": "#/definitions/jsonschema_test.BoolPayload",
                         "$schema": "http://json-schema.org/draft-07/schema#"
                     }
                 },
@@ -61,7 +61,7 @@
                         }
                     },
                     "then": {
-                        "$ref": "#/definitions/jsonschema.IntPayload",
+                        "$ref": "#/definitions/jsonschema_test.IntPayload",
                         "$schema": "http://json-schema.org/draft-07/schema#"
                     }
                 },
@@ -85,7 +85,7 @@
                         }
                     },
                     "then": {
-                        "$ref": "#/definitions/jsonschema.StringPayload",
+                        "$ref": "#/definitions/jsonschema_test.StringPayload",
                         "$schema": "http://json-schema.org/draft-07/schema#"
                     }
                 }
@@ -97,7 +97,7 @@
             },
             "type": "object"
         },
-        "jsonschema.IntPayload": {
+        "jsonschema_test.IntPayload": {
             "additionalProperties": false,
             "properties": {
                 "payload": {
@@ -109,7 +109,7 @@
             ],
             "type": "object"
         },
-        "jsonschema.StringPayload": {
+        "jsonschema_test.StringPayload": {
             "additionalProperties": false,
             "properties": {
                 "payload": {

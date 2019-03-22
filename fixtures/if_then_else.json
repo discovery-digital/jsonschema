@@ -1,11 +1,11 @@
 {
-  "$ref": "#/definitions/jsonschema.Application",
+  "$ref": "#/definitions/jsonschema_test.Application",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "jsonschema.Application": {
+    "jsonschema_test.Application": {
       "additionalProperties": false,
       "else": {
-        "$ref": "#/definitions/jsonschema.MobileApp",
+        "$ref": "#/definitions/jsonschema_test.MobileApp",
         "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "if": {
@@ -22,12 +22,12 @@
       },
       "required": ["type"],
       "then": {
-        "$ref": "#/definitions/jsonschema.WebApp",
+        "$ref": "#/definitions/jsonschema_test.WebApp",
         "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "type": "object"
     },
-    "jsonschema.MobileApp": {
+    "jsonschema_test.MobileApp": {
       "additionalProperties": false,
       "properties": {
         "device": {
@@ -37,7 +37,7 @@
       "required": ["device"],
       "type": "object"
     },
-    "jsonschema.WebApp": {
+    "jsonschema_test.WebApp": {
       "additionalProperties": false,
       "properties": {
         "browser": {

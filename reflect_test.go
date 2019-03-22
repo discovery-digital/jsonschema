@@ -1,8 +1,9 @@
-package jsonschema
+package jsonschema_test
 
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/discovery-digital/jsonschema"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -10,21 +11,21 @@ import (
 )
 
 type testSet struct {
-	reflector *Reflector
+	reflector *jsonschema.Reflector
 	fixture   string
 	actual    interface{}
 }
 
 var schemaGenerationTests = []testSet{
-	{&Reflector{}, "fixtures/defaults.json", TestUser{}},
-	{&Reflector{AllowAdditionalProperties: true}, "fixtures/allow_additional_props.json", TestUser{}},
-	{&Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/required_from_jsontags.json", TestUser{}},
-	{&Reflector{ExpandedStruct: true}, "fixtures/defaults_expanded_toplevel.json", TestUser{}},
-	{&Reflector{}, "fixtures/test_one_of_default.json", TestUserOneOf{}},
-	{&Reflector{}, "fixtures/test_package.json", TestUserPackage{}},
-	{&Reflector{}, "fixtures/if_then_else.json", Application{}},
-	{&Reflector{}, "fixtures/case.json", ExampleCase{}},
-	{&Reflector{}, "fixtures/test_min_max_items.json", SliceTestType{}},
+	{&jsonschema.Reflector{}, "fixtures/defaults.json", TestUser{}},
+	{&jsonschema.Reflector{AllowAdditionalProperties: true}, "fixtures/allow_additional_props.json", TestUser{}},
+	{&jsonschema.Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/required_from_jsontags.json", TestUser{}},
+	{&jsonschema.Reflector{ExpandedStruct: true}, "fixtures/defaults_expanded_toplevel.json", TestUser{}},
+	{&jsonschema.Reflector{}, "fixtures/test_one_of_default.json", TestUserOneOf{}},
+	{&jsonschema.Reflector{}, "fixtures/test_versioned_packages.json", TestVersionedPackages{}},
+	{&jsonschema.Reflector{}, "fixtures/if_then_else.json", Application{}},
+	{&jsonschema.Reflector{}, "fixtures/case.json", ExampleCase{}},
+	{&jsonschema.Reflector{}, "fixtures/test_min_max_items.json", SliceTestType{}},
 }
 
 func TestSchemaGeneration(t *testing.T) {
@@ -33,11 +34,11 @@ func TestSchemaGeneration(t *testing.T) {
 	}
 }
 func TestOverrides(t *testing.T) {
-	override := GetSchemaTagOverride()
+	override := jsonschema.GetSchemaTagOverride()
 	override.Set(Hardware{}, "Brand", "enum=microsoft|apple|lenovo|dell")
 
 	test := testSet{
-		reflector: &Reflector{Overrides: override},
+		reflector: &jsonschema.Reflector{Overrides: override},
 		fixture:   "fixtures/override_jsonschema_tag.json",
 		actual:    TestUserOneOf{},
 	}

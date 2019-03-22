@@ -1,4 +1,4 @@
-package jsonschema
+package jsonschema_test
 
 import (
 	"net"

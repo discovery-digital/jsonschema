@@ -1,7 +1,10 @@
-package jsonschema
+package jsonschema_test
 
-import "reflect"
+import (
+	"reflect"
+)
 
+// These are models used for the subschema_boolean test, but the actual test cases are in reflect_test.go
 type TestUserOneOf struct {
 	Tester    Tester    `json:"tester"`
 	Developer Developer `json:"developer"`
@@ -62,3 +65,6 @@ func (h Hardware) AndOneOf() []reflect.StructField {
 		reflect.StructField{Type: reflect.TypeOf(Desktop{})},
 	}
 }
+
+
+

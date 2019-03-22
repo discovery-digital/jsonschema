@@ -1,6 +1,7 @@
-package jsonschema
+package jsonschema_test
 
 import (
+	"github.com/discovery-digital/jsonschema"
 	"reflect"
 	"testing"
 )
@@ -19,7 +20,7 @@ type Alien struct {
 }
 
 func TestSchemaTagOverrideSet(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	ok := sto.Set(Human{}, "Name", "required")
 
 	if ok != nil {
@@ -28,7 +29,7 @@ func TestSchemaTagOverrideSet(t *testing.T) {
 }
 
 func TestSchemaTagOverrideSetPointer(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	ok := sto.Set(&Human{}, "Name", "required")
 
 	if ok == nil {
@@ -37,7 +38,7 @@ func TestSchemaTagOverrideSetPointer(t *testing.T) {
 }
 
 func TestSchemaTagOverrideSetErrorForInvalidField(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	ok := sto.Set(Human{}, "name", "required")
 
 	if ok == nil {
@@ -46,7 +47,7 @@ func TestSchemaTagOverrideSetErrorForInvalidField(t *testing.T) {
 }
 
 func TestGetSchemaTagOverrideGet(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	sto.Set(Human{}, "Name", "required")
 
 	tag := sto.Get(reflect.TypeOf(Human{}), "Name")
@@ -57,7 +58,7 @@ func TestGetSchemaTagOverrideGet(t *testing.T) {
 }
 
 func TestGetSchemaTagOverrideGetNonExistentField(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	sto.Set(Human{}, "Name", "required")
 
 	tag := sto.Get(reflect.TypeOf(Human{}), "bloop")
@@ -68,7 +69,7 @@ func TestGetSchemaTagOverrideGetNonExistentField(t *testing.T) {
 }
 
 func TestGetSchemaTagOverrideGetMultipleFields(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	sto.Set(Human{}, "Name", "required")
 	sto.Set(Human{}, "Sex", "required,enum=male|female|neither|both")
 
@@ -81,7 +82,7 @@ func TestGetSchemaTagOverrideGetMultipleFields(t *testing.T) {
 }
 
 func TestGetSchemaTagOverrideGetMultipleKeys(t *testing.T) {
-	sto := GetSchemaTagOverride()
+	sto := jsonschema.GetSchemaTagOverride()
 	sto.Set(Human{}, "Name", "required")
 	sto.Set(Alien{}, "bloop", "required,enum=3.1415926535897932384626")
 

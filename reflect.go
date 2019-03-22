@@ -28,19 +28,6 @@ type Schema struct {
 	Definitions Definitions `json:"definitions,omitempty"`
 }
 
-// SchemaCondition holds data for if/then/else jsonschema statements
-type SchemaCondition struct {
-	If   reflect.StructField
-	Then interface{}
-	Else interface{}
-}
-
-// SchemaSwitch holds data for emulating switch case over some field value
-type SchemaSwitch struct {
-	ByField string
-	Cases   map[string]interface{}
-}
-
 // Type represents a JSON Schema object type.
 type Type struct {
 	// RFC draft-wright-json-schema-00
@@ -172,43 +159,6 @@ type protoEnum interface {
 	EnumDescriptor() ([]byte, []int)
 }
 
-// Implement AndOneOf() when oneOf is used to factor out common parts of subschema
-// {
-//  "type": "number",
-//  "oneOf": [
-//    { "multipleOf": 5 },
-//    { "multipleOf": 3 }
-//  ]
-//}
-type andOneOf interface {
-	AndOneOf() []reflect.StructField
-}
-
-// Implement OneOf() when oneOf is exclusive
-// {
-//  "oneOf": [
-//    { "type": "number", "multipleOf": 5 },
-//    { "type": "number", "multipleOf": 3 }
-//  ]
-// }
-type oneOf interface {
-	OneOf() []reflect.StructField
-}
-
-//Implement IfThenElse() when condition needs to be used
-// {
-//    "if": { "properties": { "power": { "minimum": 9000 } } },
-//    "then": { "required": [ "disbelief" ] },
-//    "else": { "required": [ "confidence" ] }
-// }
-type ifThenElse interface {
-	IfThenElse() SchemaCondition
-}
-
-type schemaCase interface {
-	Case() SchemaSwitch
-}
-
 type minItems interface {
 	MinItems() int
 }
@@ -218,10 +168,6 @@ type maxItems interface {
 }
 
 var protoEnumType = reflect.TypeOf((*protoEnum)(nil)).Elem()
-var andOneOfType = reflect.TypeOf((*andOneOf)(nil)).Elem()
-var oneOfType = reflect.TypeOf((*oneOf)(nil)).Elem()
-var ifThenElseType = reflect.TypeOf((*ifThenElse)(nil)).Elem()
-var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
 var minItemsType = reflect.TypeOf((*minItems)(nil)).Elem()
 var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
@@ -240,19 +186,15 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 		}}
 	}
 
-	// Return only oneOf array when OneOf() is implemented
-	if t.Implements(oneOfType) {
-		s := reflect.New(t).Interface().(oneOf).OneOf()
-		return &Type{OneOf: r.getOneOfList(definitions, s)}
+	// When OneOf/AnyOf/AllOf interfaces are implemented, we will not process any rules from the struct that implements it
+	// jsonschema will be generated for only what is returned in []reflect.StructField
+	if schema = r.getExclusiveSubschemaForBooleanCases(definitions, t); schema != nil {
+		return schema
 	}
 
-	// Append oneOf array to existing non-object type when AndOneOf() is implemented
 	defer func() {
 		if t.Kind() != reflect.Struct {
-			if t.Implements(andOneOfType) {
-				s := reflect.New(t).Interface().(andOneOf).AndOneOf()
-				schema.OneOf = r.getOneOfList(definitions, s)
-			}
+			r.addSubschemasForBooleanCases(schema, definitions, t)
 		}
 	}()
 
@@ -363,51 +305,12 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 	packageName := getPackageNameFromPath(t.PkgPath())
 	definitions[packageName+"."+t.Name()] = st
 	r.reflectStructFields(st, definitions, t)
-	if t.Implements(ifThenElseType) {
-		condition := reflect.New(t).Interface().(ifThenElse).IfThenElse()
-		r.reflectCondition(definitions, condition, st)
-	}
+	r.addSubschemasForConditionalCases(st, definitions, t)
 
 	return &Type{
 		Version: Version,
 		Ref:     "#/definitions/" + packageName + "." + t.Name(),
 	}
-}
-
-func (r *Reflector) reflectCondition(definitions Definitions, sc SchemaCondition, t *Type) {
-	conditionSchema := Type{}
-	conditionSchema.structKeywordsFromTags(r.getJSONSchemaTags(sc.If, nil))
-
-	t.If = &Type{
-		Properties: map[string]*Type{
-			sc.If.Tag.Get("json"): &conditionSchema,
-		},
-	}
-
-	if reflect.TypeOf(sc.Then) != nil {
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Then))
-	}
-	if reflect.TypeOf(sc.Else) != nil {
-		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Else))
-	}
-}
-
-func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
-	casesList := make([]*Type, 0)
-	for key, value := range sc.Cases {
-		t := &Type{}
-		t.If = &Type{
-			Properties: map[string]*Type{
-				sc.ByField: &Type{
-					Enum: []interface{}{key},
-				},
-			},
-		}
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value))
-		t.Else = t.If
-		casesList = append(casesList, t)
-	}
-	return casesList
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
@@ -435,16 +338,9 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		}
 
 	}
-	// Append oneOf array to existing object type when AndOneOf() is implemented
-	if t.Implements(andOneOfType) {
-		s := reflect.New(t).Interface().(andOneOf).AndOneOf()
-		st.OneOf = r.getOneOfList(definitions, s)
-	}
 
-	if t.Implements(schemaCaseType) {
-		schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
-		st.OneOf = r.reflectCases(definitions, schemaSwitch)
-	}
+	r.addSubschemasForBooleanCases(st, definitions, t)
+	r.addSubschemasForSwitch(st, definitions, t)
 }
 
 func (t *Type) structKeywordsFromTags(tags []string) {
@@ -680,18 +576,6 @@ func (r *Reflector) reflectFieldName(f reflect.StructField, t reflect.Type) (str
 	}
 
 	return name, required
-}
-
-func (r *Reflector) getOneOfList(definitions Definitions, s []reflect.StructField) []*Type {
-	oneOfList := make([]*Type, 0)
-	for _, oneType := range s {
-		if oneType.Type == nil {
-			oneOfList = append(oneOfList, &Type{Type: "null"})
-		} else {
-			oneOfList = append(oneOfList, r.reflectTypeToSchema(definitions, oneType.Type))
-		}
-	}
-	return oneOfList
 }
 
 func (r *Reflector) getJSONSchemaTags(f reflect.StructField, t reflect.Type) []string {

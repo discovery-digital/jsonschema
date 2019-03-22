@@ -1,18 +1,18 @@
-package jsonschema
+package jsonschema_test
 
 import (
+	v1 "github.com/discovery-digital/jsonschema/v1"
+	v2 "github.com/discovery-digital/jsonschema/v2"
 	"reflect"
-
-	"github.com/discovery-digital/jsonschema/v1"
-	"github.com/discovery-digital/jsonschema/v2"
 )
 
-type TestUserPackage struct {
+// These are models used for the versioned package test, but the actual test cases are in reflect_test.go
+type TestVersionedPackages struct {
 	Tester    TesterPackage    `json:"tester"`
 	Developer DeveloperPackage `json:"developer"`
 }
 
-func (user TestUserPackage) OneOf() []reflect.StructField {
+func (user TestVersionedPackages) OneOf() []reflect.StructField {
 	tester, _ := reflect.TypeOf(user).FieldByName("Tester")
 	developer, _ := reflect.TypeOf(user).FieldByName("Developer")
 	return []reflect.StructField{
