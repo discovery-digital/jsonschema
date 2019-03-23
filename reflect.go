@@ -28,19 +28,6 @@ type Schema struct {
 	Definitions Definitions `json:"definitions,omitempty"`
 }
 
-// SchemaCondition holds data for if/then/else jsonschema statements
-type SchemaCondition struct {
-	If   reflect.StructField
-	Then interface{}
-	Else interface{}
-}
-
-// SchemaSwitch holds data for emulating switch case over some field value
-type SchemaSwitch struct {
-	ByField string
-	Cases   map[string]interface{}
-}
-
 // Type represents a JSON Schema object type.
 type Type struct {
 	// RFC draft-wright-json-schema-00
@@ -172,43 +159,6 @@ type protoEnum interface {
 	EnumDescriptor() ([]byte, []int)
 }
 
-// Implement AndOneOf() when oneOf is used to factor out common parts of subschema
-// {
-//  "type": "number",
-//  "oneOf": [
-//    { "multipleOf": 5 },
-//    { "multipleOf": 3 }
-//  ]
-//}
-type andOneOf interface {
-	AndOneOf() []reflect.StructField
-}
-
-// Implement OneOf() when oneOf is exclusive
-// {
-//  "oneOf": [
-//    { "type": "number", "multipleOf": 5 },
-//    { "type": "number", "multipleOf": 3 }
-//  ]
-// }
-type oneOf interface {
-	OneOf() []reflect.StructField
-}
-
-//Implement IfThenElse() when condition needs to be used
-// {
-//    "if": { "properties": { "power": { "minimum": 9000 } } },
-//    "then": { "required": [ "disbelief" ] },
-//    "else": { "required": [ "confidence" ] }
-// }
-type ifThenElse interface {
-	IfThenElse() SchemaCondition
-}
-
-type schemaCase interface {
-	Case() SchemaSwitch
-}
-
 type minItems interface {
 	MinItems() int
 }
@@ -218,10 +168,6 @@ type maxItems interface {
 }
 
 var protoEnumType = reflect.TypeOf((*protoEnum)(nil)).Elem()
-var andOneOfType = reflect.TypeOf((*andOneOf)(nil)).Elem()
-var oneOfType = reflect.TypeOf((*oneOf)(nil)).Elem()
-var ifThenElseType = reflect.TypeOf((*ifThenElse)(nil)).Elem()
-var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
 var minItemsType = reflect.TypeOf((*minItems)(nil)).Elem()
 var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
@@ -239,22 +185,6 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 			{Type: "integer"},
 		}}
 	}
-
-	// Return only oneOf array when OneOf() is implemented
-	if t.Implements(oneOfType) {
-		s := reflect.New(t).Interface().(oneOf).OneOf()
-		return &Type{OneOf: r.getOneOfList(definitions, s)}
-	}
-
-	// Append oneOf array to existing non-object type when AndOneOf() is implemented
-	defer func() {
-		if t.Kind() != reflect.Struct {
-			if t.Implements(andOneOfType) {
-				s := reflect.New(t).Interface().(andOneOf).AndOneOf()
-				schema.OneOf = r.getOneOfList(definitions, s)
-			}
-		}
-	}()
 
 	// Defined format types for JSON Schema Validation
 	// RFC draft-wright-json-schema-validation-00, section 7.3
@@ -355,18 +285,22 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 
 // Refects a struct to a JSON Schema type.
 func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type {
+	// When OneOf/AnyOf/AllOf interfaces are implemented, we will not process any rules from the struct that implements it
+	// jsonschema will be generated for only what is returned in []reflect.StructField
+	if schema := r.getExclusiveSubschemaForBooleanCases(definitions, t); schema != nil {
+		return schema
+	}
+
 	st := &Type{
 		Type:                 "object",
 		Properties:           map[string]*Type{},
 		AdditionalProperties: bool2bytes(r.AllowAdditionalProperties),
 	}
+
 	packageName := getPackageNameFromPath(t.PkgPath())
 	definitions[packageName+"."+t.Name()] = st
 	r.reflectStructFields(st, definitions, t)
-	if t.Implements(ifThenElseType) {
-		condition := reflect.New(t).Interface().(ifThenElse).IfThenElse()
-		r.reflectCondition(definitions, condition, st)
-	}
+	r.addSubschemasForConditionalCases(st, definitions, t)
 
 	return &Type{
 		Version: Version,
@@ -374,46 +308,8 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 	}
 }
 
-func (r *Reflector) reflectCondition(definitions Definitions, sc SchemaCondition, t *Type) {
-	conditionSchema := Type{}
-	conditionSchema.structKeywordsFromTags(r.getJSONSchemaTags(sc.If, nil))
-
-	t.If = &Type{
-		Properties: map[string]*Type{
-			sc.If.Tag.Get("json"): &conditionSchema,
-		},
-	}
-
-	if reflect.TypeOf(sc.Then) != nil {
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Then))
-	}
-	if reflect.TypeOf(sc.Else) != nil {
-		t.Else = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Else))
-	}
-}
-
-func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
-	casesList := make([]*Type, 0)
-	for key, value := range sc.Cases {
-		t := &Type{}
-		t.If = &Type{
-			Properties: map[string]*Type{
-				sc.ByField: &Type{
-					Enum: []interface{}{key},
-				},
-			},
-		}
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value))
-		t.Else = t.If
-		casesList = append(casesList, t)
-	}
-	return casesList
-}
-
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
+	t = getNonPointerType(t)
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		// anonymous and exported type should be processed recursively
@@ -435,16 +331,9 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		}
 
 	}
-	// Append oneOf array to existing object type when AndOneOf() is implemented
-	if t.Implements(andOneOfType) {
-		s := reflect.New(t).Interface().(andOneOf).AndOneOf()
-		st.OneOf = r.getOneOfList(definitions, s)
-	}
 
-	if t.Implements(schemaCaseType) {
-		schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
-		st.OneOf = r.reflectCases(definitions, schemaSwitch)
-	}
+	r.addSubschemasForBooleanCases(st, definitions, t)
+	r.addSubschemasForSwitch(st, definitions, t)
 }
 
 func (t *Type) structKeywordsFromTags(tags []string) {
@@ -601,55 +490,6 @@ func (t *Type) arrayKeywords(tags []string) {
 	}
 }
 
-// `json:"-"` and `json:"omitempty"` make the field optional
-func requiredFromJSONTags(tags []string) bool {
-	if ignoredByJSONTags(tags) {
-		return false
-	}
-
-	for _, tag := range tags[1:] {
-		if tag == "omitempty" {
-			return false
-		}
-	}
-	return true
-}
-
-// Setting RequiredFromJSONSchemaTags to true allows usage of the `required` tag to make a field required
-func requiredFromJSONSchemaTags(tags []string) bool {
-	if ignoredByJSONSchemaTags(tags) {
-		return false
-	}
-	for _, tag := range tags {
-		if tag == "required" {
-			return true
-		}
-	}
-	return false
-}
-
-// `jsonschema:"optional"` will make the field optional
-//
-// The use case for this is when you are taking json input where validation on a field should be optional
-// but you do not want to declare `omitempty` because you serialize the struct to json to a third party
-// and the fields must exist (such as a field that's an int)
-func remainsRequiredFromJSONSchemaTags(tags []string, currentlyRequired bool) bool {
-	for _, tag := range tags {
-		if tag == "optional" {
-			return false
-		}
-	}
-	return currentlyRequired
-}
-
-func ignoredByJSONTags(tags []string) bool {
-	return tags[0] == "-"
-}
-
-func ignoredByJSONSchemaTags(tags []string) bool {
-	return tags[0] == "-"
-}
-
 func (r *Reflector) reflectFieldName(f reflect.StructField, t reflect.Type) (string, bool) {
 	if f.PkgPath != "" { // unexported field, ignore it
 		return "", false
@@ -682,18 +522,6 @@ func (r *Reflector) reflectFieldName(f reflect.StructField, t reflect.Type) (str
 	return name, required
 }
 
-func (r *Reflector) getOneOfList(definitions Definitions, s []reflect.StructField) []*Type {
-	oneOfList := make([]*Type, 0)
-	for _, oneType := range s {
-		if oneType.Type == nil {
-			oneOfList = append(oneOfList, &Type{Type: "null"})
-		} else {
-			oneOfList = append(oneOfList, r.reflectTypeToSchema(definitions, oneType.Type))
-		}
-	}
-	return oneOfList
-}
-
 func (r *Reflector) getJSONSchemaTags(f reflect.StructField, t reflect.Type) []string {
 	tag := f.Tag.Get("jsonschema")
 
@@ -704,18 +532,4 @@ func (r *Reflector) getJSONSchemaTags(f reflect.StructField, t reflect.Type) []s
 	}
 
 	return strings.Split(tag, ",")
-}
-
-// getPackageNameFromPath splits path to struct and return last element which is package name
-func getPackageNameFromPath(path string) string {
-	pathSlices := strings.Split(path, "/")
-	return pathSlices[len(pathSlices)-1]
-}
-
-// bool2bytes serializes bool to JSON
-func bool2bytes(val bool) []byte {
-	if val {
-		return []byte("true")
-	}
-	return []byte("false")
 }

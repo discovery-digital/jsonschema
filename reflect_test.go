@@ -1,8 +1,10 @@
-package jsonschema
+package jsonschema_test
 
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/discovery-digital/jsonschema"
+	"github.com/discovery-digital/jsonschema/internal/testmodels"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -10,21 +12,21 @@ import (
 )
 
 type testSet struct {
-	reflector *Reflector
+	reflector *jsonschema.Reflector
 	fixture   string
 	actual    interface{}
 }
 
 var schemaGenerationTests = []testSet{
-	{&Reflector{}, "fixtures/defaults.json", TestUser{}},
-	{&Reflector{AllowAdditionalProperties: true}, "fixtures/allow_additional_props.json", TestUser{}},
-	{&Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/required_from_jsontags.json", TestUser{}},
-	{&Reflector{ExpandedStruct: true}, "fixtures/defaults_expanded_toplevel.json", TestUser{}},
-	{&Reflector{}, "fixtures/test_one_of_default.json", TestUserOneOf{}},
-	{&Reflector{}, "fixtures/test_package.json", TestUserPackage{}},
-	{&Reflector{}, "fixtures/if_then_else.json", Application{}},
-	{&Reflector{}, "fixtures/case.json", ExampleCase{}},
-	{&Reflector{}, "fixtures/test_min_max_items.json", SliceTestType{}},
+	{&jsonschema.Reflector{}, "fixtures/defaults.json", testmodels.TestUser{}},
+	{&jsonschema.Reflector{AllowAdditionalProperties: true}, "fixtures/allow_additional_props.json", testmodels.TestUser{}},
+	{&jsonschema.Reflector{RequiredFromJSONSchemaTags: true}, "fixtures/required_from_jsontags.json", testmodels.TestUser{}},
+	{&jsonschema.Reflector{ExpandedStruct: true}, "fixtures/defaults_expanded_toplevel.json", testmodels.TestUser{}},
+	{&jsonschema.Reflector{}, "fixtures/test_one_of_default.json", testmodels.TestUserOneOf{}},
+	{&jsonschema.Reflector{}, "fixtures/test_versioned_packages.json", testmodels.TestVersionedPackages{}},
+	{&jsonschema.Reflector{}, "fixtures/if_then_else.json", testmodels.Application{}},
+	{&jsonschema.Reflector{}, "fixtures/case.json", testmodels.ExampleCase{}},
+	{&jsonschema.Reflector{}, "fixtures/test_min_max_items.json", testmodels.SliceTestType{}},
 }
 
 func TestSchemaGeneration(t *testing.T) {
@@ -33,13 +35,13 @@ func TestSchemaGeneration(t *testing.T) {
 	}
 }
 func TestOverrides(t *testing.T) {
-	override := GetSchemaTagOverride()
-	override.Set(Hardware{}, "Brand", "enum=microsoft|apple|lenovo|dell")
+	override := jsonschema.GetSchemaTagOverride()
+	override.Set(testmodels.Hardware{}, "Brand", "enum=microsoft|apple|lenovo|dell")
 
 	test := testSet{
-		reflector: &Reflector{Overrides: override},
+		reflector: &jsonschema.Reflector{Overrides: override},
 		fixture:   "fixtures/override_jsonschema_tag.json",
-		actual:    TestUserOneOf{},
+		actual:    testmodels.TestUserOneOf{},
 	}
 
 	runTests(t, test)

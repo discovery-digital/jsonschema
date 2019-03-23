@@ -1,6 +1,6 @@
 {
   "definitions": {
-    "jsonschema.Desktop": {
+    "testmodels.Desktop": {
       "additionalProperties": false,
       "properties": {
         "form_factor": {
@@ -14,7 +14,7 @@
       "required": ["form_factor", "need_keyboard"],
       "type": "object"
     },
-    "jsonschema.Developer": {
+    "testmodels.Developer": {
       "additionalProperties": false,
       "properties": {
         "experience": {
@@ -29,7 +29,7 @@
           ]
         },
         "hardware": {
-          "$ref": "#/definitions/jsonschema.Hardware",
+          "$ref": "#/definitions/testmodels.Hardware",
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "language": {
@@ -47,13 +47,13 @@
       "required": ["experience", "language", "hardware"],
       "type": "object"
     },
-    "jsonschema.Hardware": {
+    "testmodels.Hardware": {
       "additionalProperties": false,
       "oneOf": [{
-        "$ref": "#/definitions/jsonschema.Laptop",
+        "$ref": "#/definitions/testmodels.Laptop",
         "$schema": "http://json-schema.org/draft-07/schema#"
       }, {
-        "$ref": "#/definitions/jsonschema.Desktop",
+        "$ref": "#/definitions/testmodels.Desktop",
         "$schema": "http://json-schema.org/draft-07/schema#"
       }],
       "properties": {
@@ -68,7 +68,7 @@
       "required": ["brand", "memory"],
       "type": "object"
     },
-    "jsonschema.Laptop": {
+    "testmodels.Laptop": {
       "additionalProperties": false,
       "properties": {
         "brand": {
@@ -82,7 +82,7 @@
       "required": ["brand", "need_touchscreen"],
       "type": "object"
     },
-    "jsonschema.Tester": {
+    "testmodels.Tester": {
       "additionalProperties": false,
       "properties": {
         "experience": {
@@ -101,10 +101,10 @@
     }
   },
   "oneOf": [{
-    "$ref": "#/definitions/jsonschema.Tester",
+    "$ref": "#/definitions/testmodels.Tester",
     "$schema": "http://json-schema.org/draft-07/schema#"
   }, {
-    "$ref": "#/definitions/jsonschema.Developer",
+    "$ref": "#/definitions/testmodels.Developer",
     "$schema": "http://json-schema.org/draft-07/schema#"
   }]
 }

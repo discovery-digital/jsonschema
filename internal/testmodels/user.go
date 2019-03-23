@@ -1,4 +1,4 @@
-package jsonschema
+package testmodels
 
 import (
 	"net"
