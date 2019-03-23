@@ -16,6 +16,10 @@ type ifThenElse interface {
 }
 
 // SchemaCondition holds data for if/then/else jsonschema statements
+//
+// If: A reflect.StructField that defines the condition to be met.
+// Then: A type that will be converted to a jsonschema subschema and evaluated if the condition is met
+// Else: A type that will be converted to a jsonschema subschema and evaluated if the condition is not met
 type SchemaCondition struct {
 	If   reflect.StructField
 	Then interface{}

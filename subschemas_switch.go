@@ -35,7 +35,10 @@ type schemaCase interface {
 
 // SchemaSwitch holds data for emulating switch case over some field value
 type SchemaSwitch struct {
+	// ByField = the name of the field you wish to evaluate (ex: "species")
 	ByField string
+	// Each key = the value for the field being evaluated (ex: "turtle")
+	// Each value = the struct that holds the jsonschema tags to validate against when it is that value (ex: Turtle{})
 	Cases   map[string]interface{}
 }
 
