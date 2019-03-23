@@ -28,8 +28,10 @@ func (r *Reflector) addSubschemasForConditionalCases(schema *Type, definitions D
 		return
 	}
 
+	t, nonNilPointer := getNonNilPointerTypeAndInterface(t)
+
 	if t.Implements(ifThenElseType) {
-		condition := reflect.New(t).Interface().(ifThenElse).IfThenElse()
+		condition := nonNilPointer.(ifThenElse).IfThenElse()
 		r.reflectCondition(definitions, condition, schema)
 	}
 }

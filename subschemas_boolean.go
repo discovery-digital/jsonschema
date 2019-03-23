@@ -63,20 +63,25 @@ type allOf interface {
 // When AnyOf/OneOf/AllOf are implemented, the jsonschema for the implementing struct will be supplanted with
 // exclusive anyOf/oneOf/allOf rules
 func (r *Reflector) getExclusiveSubschemaForBooleanCases(definitions Definitions, t reflect.Type) *Type {
+
+	var nonNilPointer interface{}
+	t, nonNilPointer = getNonNilPointerTypeAndInterface(t)
+
 	if t.Implements(anyOfType) {
-		s := reflect.New(t).Interface().(anyOf).AnyOf()
+		s := nonNilPointer.(anyOf).AnyOf()
 		return &Type{AnyOf: r.getSubschemasForBooleanCases(definitions, s)}
 	}
 	if t.Implements(oneOfType) {
-		s := reflect.New(t).Interface().(oneOf).OneOf()
+		s := nonNilPointer.(oneOf).OneOf()
 		return &Type{OneOf: r.getSubschemasForBooleanCases(definitions, s)}
 	}
 	if t.Implements(allOfType) {
-		s := reflect.New(t).Interface().(allOf).AllOf()
+		s := nonNilPointer.(allOf).AllOf()
 		return &Type{AllOf: r.getSubschemasForBooleanCases(definitions, s)}
 	}
 
 	return nil
+
 }
 
 // Append jsonschema rules from AndOneOf/AndAnyOf/AndAllOf interfaces
@@ -86,16 +91,19 @@ func (r *Reflector) addSubschemasForBooleanCases(schema *Type, definitions Defin
 		return
 	}
 
+	var nonNilPointer interface{}
+	t, nonNilPointer = getNonNilPointerTypeAndInterface(t)
+
 	if t.Implements(andAnyOfType) {
-		s := reflect.New(t).Interface().(andAnyOf).AndAnyOf()
+		s := nonNilPointer.(andAnyOf).AndAnyOf()
 		schema.AnyOf = r.getSubschemasForBooleanCases(definitions, s)
 	}
 	if t.Implements(andOneOfType) {
-		s := reflect.New(t).Interface().(andOneOf).AndOneOf()
+		s := nonNilPointer.(andOneOf).AndOneOf()
 		schema.OneOf = r.getSubschemasForBooleanCases(definitions, s)
 	}
 	if t.Implements(andAllOfType) {
-		s := reflect.New(t).Interface().(andAllOf).AndAllOf()
+		s := nonNilPointer.(andAllOf).AndAllOf()
 		schema.AllOf = r.getSubschemasForBooleanCases(definitions, s)
 	}
 }

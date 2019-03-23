@@ -47,8 +47,11 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 		return
 	}
 
+	var nonNilPointer interface{}
+	t, nonNilPointer = getNonNilPointerTypeAndInterface(t)
+
 	if t.Implements(schemaCaseType) {
-		schemaSwitch := reflect.New(t).Interface().(schemaCase).Case()
+		schemaSwitch := nonNilPointer.(schemaCase).Case()
 		st.OneOf = r.reflectCases(definitions, schemaSwitch)
 	}
 }

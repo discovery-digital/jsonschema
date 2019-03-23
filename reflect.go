@@ -186,18 +186,6 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 		}}
 	}
 
-	// When OneOf/AnyOf/AllOf interfaces are implemented, we will not process any rules from the struct that implements it
-	// jsonschema will be generated for only what is returned in []reflect.StructField
-	if schema = r.getExclusiveSubschemaForBooleanCases(definitions, t); schema != nil {
-		return schema
-	}
-
-	defer func() {
-		if t.Kind() != reflect.Struct {
-			r.addSubschemasForBooleanCases(schema, definitions, t)
-		}
-	}()
-
 	// Defined format types for JSON Schema Validation
 	// RFC draft-wright-json-schema-validation-00, section 7.3
 	// TODO email RFC section 7.3.2, hostname RFC section 7.3.3, uriref RFC section 7.3.7
@@ -297,11 +285,18 @@ func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type)
 
 // Refects a struct to a JSON Schema type.
 func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type {
+	// When OneOf/AnyOf/AllOf interfaces are implemented, we will not process any rules from the struct that implements it
+	// jsonschema will be generated for only what is returned in []reflect.StructField
+	if schema := r.getExclusiveSubschemaForBooleanCases(definitions, t); schema != nil {
+		return schema
+	}
+
 	st := &Type{
 		Type:                 "object",
 		Properties:           map[string]*Type{},
 		AdditionalProperties: bool2bytes(r.AllowAdditionalProperties),
 	}
+
 	packageName := getPackageNameFromPath(t.PkgPath())
 	definitions[packageName+"."+t.Name()] = st
 	r.reflectStructFields(st, definitions, t)
@@ -314,9 +309,7 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
-	if t.Kind() == reflect.Ptr {
-		t = t.Elem()
-	}
+	t = getNonPointerType(t)
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		// anonymous and exported type should be processed recursively
@@ -497,55 +490,6 @@ func (t *Type) arrayKeywords(tags []string) {
 	}
 }
 
-// `json:"-"` and `json:"omitempty"` make the field optional
-func requiredFromJSONTags(tags []string) bool {
-	if ignoredByJSONTags(tags) {
-		return false
-	}
-
-	for _, tag := range tags[1:] {
-		if tag == "omitempty" {
-			return false
-		}
-	}
-	return true
-}
-
-// Setting RequiredFromJSONSchemaTags to true allows usage of the `required` tag to make a field required
-func requiredFromJSONSchemaTags(tags []string) bool {
-	if ignoredByJSONSchemaTags(tags) {
-		return false
-	}
-	for _, tag := range tags {
-		if tag == "required" {
-			return true
-		}
-	}
-	return false
-}
-
-// `jsonschema:"optional"` will make the field optional
-//
-// The use case for this is when you are taking json input where validation on a field should be optional
-// but you do not want to declare `omitempty` because you serialize the struct to json to a third party
-// and the fields must exist (such as a field that's an int)
-func remainsRequiredFromJSONSchemaTags(tags []string, currentlyRequired bool) bool {
-	for _, tag := range tags {
-		if tag == "optional" {
-			return false
-		}
-	}
-	return currentlyRequired
-}
-
-func ignoredByJSONTags(tags []string) bool {
-	return tags[0] == "-"
-}
-
-func ignoredByJSONSchemaTags(tags []string) bool {
-	return tags[0] == "-"
-}
-
 func (r *Reflector) reflectFieldName(f reflect.StructField, t reflect.Type) (string, bool) {
 	if f.PkgPath != "" { // unexported field, ignore it
 		return "", false
@@ -588,18 +532,4 @@ func (r *Reflector) getJSONSchemaTags(f reflect.StructField, t reflect.Type) []s
 	}
 
 	return strings.Split(tag, ",")
-}
-
-// getPackageNameFromPath splits path to struct and return last element which is package name
-func getPackageNameFromPath(path string) string {
-	pathSlices := strings.Split(path, "/")
-	return pathSlices[len(pathSlices)-1]
-}
-
-// bool2bytes serializes bool to JSON
-func bool2bytes(val bool) []byte {
-	if val {
-		return []byte("true")
-	}
-	return []byte("false")
 }
