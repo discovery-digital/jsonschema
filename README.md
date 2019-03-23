@@ -10,7 +10,6 @@ This package can be used to generate [JSON Schemas](http://json-schema.org/lates
 It supports arbitrarily complex types, including `interface{}`, maps, slices, etc.
 And it also supports json-schema features such as minLength, maxLength, pattern, format and etc.
 
-- [Go JSON Schema Reflection](#go-json-schema-reflection)
   * [Basic Example](#basic-example)
   * [Configurable behaviour](#configurable-behaviour)
     + [ExpandedStruct](#expandedstruct)
