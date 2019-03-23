@@ -1,8 +1,8 @@
-package jsonschema_test
+package testmodels
 
 import (
-	v1 "github.com/discovery-digital/jsonschema/v1"
-	v2 "github.com/discovery-digital/jsonschema/v2"
+	"github.com/discovery-digital/jsonschema/internal/testmodels/v1"
+	v2 "github.com/discovery-digital/jsonschema/internal/testmodels/v2"
 	"reflect"
 )
 

@@ -1,4 +1,4 @@
-package jsonschema_test
+package testmodels
 
 type SliceTestType []string
 

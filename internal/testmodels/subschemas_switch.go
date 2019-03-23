@@ -1,4 +1,4 @@
-package jsonschema_test
+package testmodels
 
 import (
 	"github.com/discovery-digital/jsonschema"
@@ -32,4 +32,3 @@ func (ex ExampleCase) Case() jsonschema.SchemaSwitch {
 		Cases:   cases,
 	}
 }
-

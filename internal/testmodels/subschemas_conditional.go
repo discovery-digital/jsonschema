@@ -1,4 +1,4 @@
-package jsonschema_test
+package testmodels
 
 import (
 	"github.com/discovery-digital/jsonschema"
@@ -30,4 +30,3 @@ func (app Application) IfThenElse() jsonschema.SchemaCondition {
 		Else: MobileApp{},
 	}
 }
-

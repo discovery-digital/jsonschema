@@ -1,4 +1,4 @@
-package jsonschema_test
+package testmodels
 
 import (
 	"reflect"
@@ -10,9 +10,9 @@ type TestUserOneOf struct {
 	Developer Developer `json:"developer"`
 }
 
-func (user TestUserOneOf) OneOf() []reflect.StructField {
-	tester, _ := reflect.TypeOf(user).FieldByName("Tester")
-	developer, _ := reflect.TypeOf(user).FieldByName("Developer")
+func (user *TestUserOneOf) OneOf() []reflect.StructField {
+	tester, _ := reflect.TypeOf(TestUserOneOf{}).FieldByName("Tester")
+	developer, _ := reflect.TypeOf(TestUserOneOf{}).FieldByName("Developer")
 	return []reflect.StructField{
 		tester,
 		developer,
@@ -59,12 +59,9 @@ func (p StringOrNull) OneOf() []reflect.StructField {
 	}
 }
 
-func (h Hardware) AndOneOf() []reflect.StructField {
+func (h *Hardware) AndOneOf() []reflect.StructField {
 	return []reflect.StructField{
 		reflect.StructField{Type: reflect.TypeOf(Laptop{})},
 		reflect.StructField{Type: reflect.TypeOf(Desktop{})},
 	}
 }
-
-
-

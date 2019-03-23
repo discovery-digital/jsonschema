@@ -1,8 +1,8 @@
 {
-  "$ref": "#/definitions/jsonschema_test.TestUser",
+  "$ref": "#/definitions/testmodels.TestUser",
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "jsonschema_test.GrandfatherType": {
+    "testmodels.GrandfatherType": {
       "additionalProperties": false,
       "properties": {
         "family_name": {
@@ -12,7 +12,7 @@
       "required": ["family_name"],
       "type": "object"
     },
-    "jsonschema_test.TestUser": {
+    "testmodels.TestUser": {
       "additionalProperties": false,
       "properties": {
         "SomeUntaggedBaseProperty": {
@@ -53,7 +53,7 @@
           "type": "array"
         },
         "grand": {
-          "$ref": "#/definitions/jsonschema_test.GrandfatherType",
+          "$ref": "#/definitions/testmodels.GrandfatherType",
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "id": {
