@@ -3,12 +3,13 @@ package jsonschema_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/discovery-digital/jsonschema"
-	"github.com/discovery-digital/jsonschema/internal/testmodels"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/discovery-digital/jsonschema"
+	"github.com/discovery-digital/jsonschema/internal/testmodels"
 )
 
 type testSet struct {
@@ -27,6 +28,7 @@ var schemaGenerationTests = []testSet{
 	{&jsonschema.Reflector{}, "fixtures/if_then_else.json", testmodels.Application{}},
 	{&jsonschema.Reflector{}, "fixtures/case.json", testmodels.ExampleCase{}},
 	{&jsonschema.Reflector{}, "fixtures/test_min_max_items.json", testmodels.SliceTestType{}},
+	{&jsonschema.Reflector{AllowAdditionalProperties: true}, "fixtures/no_duplicate_fields_and _struct_precedence_over embedded.json", testmodels.Root{}},
 }
 
 func TestSchemaGeneration(t *testing.T) {

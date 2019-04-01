@@ -72,6 +72,8 @@ type Type struct {
 	// RFC draft-wright-json-schema-hyperschema-00, section 4
 	Media          *Type  `json:"media,omitempty"`          // section 4.3
 	BinaryEncoding string `json:"binaryEncoding,omitempty"` // section 4.3
+	// Precedence of Parent struct tag over embedded field tags
+	tagPrecedence map[string]reflect.StructTag
 }
 
 // Reflect reflects to Schema from a value using the default Reflector
@@ -124,6 +126,7 @@ func (r *Reflector) ReflectFromType(t reflect.Type) *Schema {
 			Type:                 "object",
 			Properties:           map[string]*Type{},
 			AdditionalProperties: bool2bytes(r.AllowAdditionalProperties),
+			tagPrecedence:        map[string]reflect.StructTag{},
 		}
 		r.reflectStructFields(st, definitions, t)
 		r.reflectStruct(definitions, t)
@@ -295,6 +298,7 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 		Type:                 "object",
 		Properties:           map[string]*Type{},
 		AdditionalProperties: bool2bytes(r.AllowAdditionalProperties),
+		tagPrecedence:        map[string]reflect.StructTag{},
 	}
 
 	packageName := getPackageNameFromPath(t.PkgPath())
@@ -312,10 +316,21 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 	t = getNonPointerType(t)
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
+		// if not Anonymous and tag not present, insert
+		// else check if present and assign propert to current field
+		if !f.Anonymous {
+			_, ok := st.tagPrecedence[f.Name]
+			if !ok {
+				st.tagPrecedence[f.Name] = f.Tag
+			} else {
+				f.Tag = st.tagPrecedence[f.Name]
+			}
+		}
 		// anonymous and exported type should be processed recursively
 		// current type should inherit properties of anonymous one
 		if f.Anonymous && f.PkgPath == "" {
 			r.reflectStructFields(st, definitions, f.Type)
+			st.tagPrecedence = map[string]reflect.StructTag{}
 			continue
 		}
 
@@ -327,9 +342,17 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		property.structKeywordsFromTags(r.getJSONSchemaTags(f, t))
 		st.Properties[name] = property
 		if required {
-			st.Required = append(st.Required, name)
+			// Boolean Value to indicate if element is already present
+			isPresent := false
+			for index := range st.Required {
+				if name == st.Required[index] {
+					isPresent = true
+				}
+			}
+			if !isPresent {
+				st.Required = append(st.Required, name)
+			}
 		}
-
 	}
 
 	r.addSubschemasForBooleanCases(st, definitions, t)
