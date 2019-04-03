@@ -39,7 +39,9 @@ type SchemaSwitch struct {
 	ByField string
 	// Each key = the value for the field being evaluated (ex: "turtle")
 	// Each value = the struct that holds the jsonschema tags to validate against when it is that value (ex: Turtle{})
-	Cases   map[string]interface{}
+	Cases map[string]interface{}
+	// Order = Elements present based on insertion oreder
+	Order []string
 }
 
 var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
@@ -61,7 +63,7 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 
 func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
 	casesList := make([]*Type, 0)
-	for key, value := range sc.Cases {
+	for _, key := range sc.Order {
 		t := &Type{}
 		t.If = &Type{
 			Properties: map[string]*Type{
@@ -70,7 +72,7 @@ func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Ty
 				},
 			},
 		}
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value))
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Cases[key]))
 		t.Else = t.If
 		casesList = append(casesList, t)
 	}
