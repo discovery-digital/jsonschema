@@ -76,6 +76,14 @@ type Type struct {
 	tagPrecedence map[string]reflect.StructTag
 }
 
+// StructOrder : to define the order of the of the structure where the root struct should br processed first then
+// the other embedded structs
+type StructOrder struct {
+	st          *Type
+	definitions Definitions
+	ft          reflect.Type
+}
+
 // Reflect reflects to Schema from a value using the default Reflector
 func Reflect(v interface{}) *Schema {
 	return ReflectFromType(reflect.TypeOf(v))
@@ -314,6 +322,8 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
 	t = getNonPointerType(t)
+	// orderArray to determine the order of the reflection for the struct
+	orderArray := []StructOrder{}
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		// if not Anonymous and tag not present, insert
@@ -329,8 +339,9 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		// anonymous and exported type should be processed recursively
 		// current type should inherit properties of anonymous one
 		if f.Anonymous && f.PkgPath == "" {
-			r.reflectStructFields(st, definitions, f.Type)
-			st.tagPrecedence = map[string]reflect.StructTag{}
+			StructOrder := StructOrder{st: st, definitions: definitions, ft: f.Type}
+			// inserting into the orderArray the current struct
+			orderArray = append(orderArray, StructOrder)
 			continue
 		}
 
@@ -354,7 +365,11 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 			}
 		}
 	}
-
+	// Processing recursively the struct for reflection of struct elements
+	for _, eachStruct := range orderArray {
+		r.reflectStructFields(eachStruct.st, eachStruct.definitions, eachStruct.ft)
+		eachStruct.st.tagPrecedence = map[string]reflect.StructTag{}
+	}
 	r.addSubschemasForBooleanCases(st, definitions, t)
 	r.addSubschemasForSwitch(st, definitions, t)
 }
