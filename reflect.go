@@ -131,8 +131,11 @@ func (r *Reflector) ReflectFromType(t reflect.Type) *Schema {
 		return &Schema{Type: st, Definitions: definitions}
 	}
 
+	rootType := r.reflectTypeToSchema(definitions, t)
+	rootType.Version = Version
+
 	s := &Schema{
-		Type:        r.reflectTypeToSchema(definitions, t),
+		Type:        rootType,
 		Definitions: definitions,
 	}
 	return s
@@ -303,10 +306,7 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 	r.reflectStructFields(st, definitions, t)
 	r.addSubschemasForConditionalCases(st, definitions, t)
 
-	return &Type{
-		Version: Version,
-		Ref:     "#/definitions/" + definitionsKey,
-	}
+	return &Type{Ref: "#/definitions/" + definitionsKey}
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {

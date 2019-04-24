@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "testmodels.DeveloperPackage": {
       "additionalProperties": false,
@@ -12,12 +13,10 @@
           }]
         },
         "hardware": {
-          "$ref": "#/definitions/v1.Hardware",
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "$ref": "#/definitions/v1.Hardware"
         },
         "hardware1": {
-          "$ref": "#/definitions/v2.Hardware",
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "$ref": "#/definitions/v2.Hardware"
         },
         "language": {
           "oneOf": [{
@@ -48,11 +47,9 @@
     "v1.Hardware": {
       "additionalProperties": false,
       "oneOf": [{
-        "$ref": "#/definitions/v1.Laptop",
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$ref": "#/definitions/v1.Laptop"
       }, {
-        "$ref": "#/definitions/v1.PC",
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$ref": "#/definitions/v1.PC"
       }],
       "properties": {
         "brand": {
@@ -110,10 +107,8 @@
     }
   },
   "oneOf": [{
-    "$ref": "#/definitions/testmodels.TesterPackage",
-    "$schema": "http://json-schema.org/draft-07/schema#"
+    "$ref": "#/definitions/testmodels.TesterPackage"
   }, {
-    "$ref": "#/definitions/testmodels.DeveloperPackage",
-    "$schema": "http://json-schema.org/draft-07/schema#"
+    "$ref": "#/definitions/testmodels.DeveloperPackage"
   }]
 }
