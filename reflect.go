@@ -173,8 +173,9 @@ var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
 func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type) (schema *Type) {
 	// Already added to definitions?
-	if _, ok := definitions[getDefinitionKeyFromType(t)]; ok {
-		return &Type{Ref: "#/definitions/" + getPackageNameFromPath(t.PkgPath()) + "." + t.Name()}
+	definitionsKey := getDefinitionKeyFromType(t)
+	if _, ok := definitions[definitionsKey]; ok {
+		return &Type{Ref: "#/definitions/" + definitionsKey}
 	}
 
 	// jsonpb will marshal protobuf enum options as either strings or integers.
@@ -297,13 +298,14 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 		AdditionalProperties: bool2bytes(r.AllowAdditionalProperties),
 	}
 
-	definitions[getDefinitionKeyFromType(t)] = st
+	definitionsKey := getDefinitionKeyFromType(t)
+	definitions[definitionsKey] = st
 	r.reflectStructFields(st, definitions, t)
 	r.addSubschemasForConditionalCases(st, definitions, t)
 
 	return &Type{
 		Version: Version,
-		Ref:     "#/definitions/" + packageName + "." + t.Name(),
+		Ref:     "#/definitions/" + definitionsKey,
 	}
 }
 
