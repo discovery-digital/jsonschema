@@ -1,1 +1,1 @@
-module github.com/discovery-digital/jsonschema
+module github.com/mrfosip/jsonschema
