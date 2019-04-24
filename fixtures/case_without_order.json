@@ -1,0 +1,125 @@
+{
+    "$ref": "#/definitions/testmodels.ExampleCaseWithoutOrder",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "definitions": {
+        "testmodels.BoolPayload": {
+            "additionalProperties": false,
+            "properties": {
+                "payload": {
+                    "type": "boolean"
+                }
+            },
+            "required": [
+                "payload"
+            ],
+            "type": "object"
+        },
+        "testmodels.ExampleCaseWithoutOrder": {
+            "additionalProperties": false,
+            "oneOf": [
+                {
+                    "else": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "bool"
+                                ]
+                            }
+                        }
+                    },
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "bool"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/testmodels.BoolPayload",
+                        "$schema": "http://json-schema.org/draft-07/schema#"
+                    }
+                },
+                {
+                    "else": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "int"
+                                ]
+                            }
+                        }
+                    },
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "int"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/testmodels.IntPayload",
+                        "$schema": "http://json-schema.org/draft-07/schema#"
+                    }
+                },
+                {
+                    "else": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "if": {
+                        "properties": {
+                            "type": {
+                                "enum": [
+                                    "string"
+                                ]
+                            }
+                        }
+                    },
+                    "then": {
+                        "$ref": "#/definitions/testmodels.StringPayload",
+                        "$schema": "http://json-schema.org/draft-07/schema#"
+                    }
+                }
+            ],
+            "properties": {
+                "type": {
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "testmodels.IntPayload": {
+            "additionalProperties": false,
+            "properties": {
+                "payload": {
+                    "type": "integer"
+                }
+            },
+            "required": [
+                "payload"
+            ],
+            "type": "object"
+        },
+        "testmodels.StringPayload": {
+            "additionalProperties": false,
+            "properties": {
+                "payload": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "payload"
+            ],
+            "type": "object"
+        }
+    }
+}

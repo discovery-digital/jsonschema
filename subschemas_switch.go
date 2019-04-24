@@ -63,6 +63,11 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 
 func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
 	casesList := make([]*Type, 0)
+	if len(sc.Order) == 0 {
+		sc.Order = append(sc.Order, "bool")
+		sc.Order = append(sc.Order, "int")
+		sc.Order = append(sc.Order, "string")
+	}
 	for _, key := range sc.Order {
 		t := &Type{}
 		t.If = &Type{

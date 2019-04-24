@@ -78,7 +78,7 @@ type Type struct {
 
 // StructOrder : to define the order of the of the structure where the root struct should br processed first then
 // the other embedded structs
-type StructOrder struct {
+type structOrder struct {
 	st          *Type
 	definitions Definitions
 	ft          reflect.Type
@@ -323,7 +323,7 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
 	t = getNonPointerType(t)
 	// orderArray to determine the order of the reflection for the struct
-	orderArray := []StructOrder{}
+	orderArray := []structOrder{}
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
 		// if not Anonymous and tag not present, insert
@@ -339,9 +339,9 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 		// anonymous and exported type should be processed recursively
 		// current type should inherit properties of anonymous one
 		if f.Anonymous && f.PkgPath == "" {
-			StructOrder := StructOrder{st: st, definitions: definitions, ft: f.Type}
+			structOrder := structOrder{st: st, definitions: definitions, ft: f.Type}
 			// inserting into the orderArray the current struct
-			orderArray = append(orderArray, StructOrder)
+			orderArray = append(orderArray, structOrder)
 			continue
 		}
 
