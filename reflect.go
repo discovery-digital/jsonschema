@@ -173,7 +173,7 @@ var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
 func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type) (schema *Type) {
 	// Already added to definitions?
-	if _, ok := definitions[t.Name()]; ok {
+	if _, ok := definitions[getDefinitionKeyFromType(t)]; ok {
 		return &Type{Ref: "#/definitions/" + getPackageNameFromPath(t.PkgPath()) + "." + t.Name()}
 	}
 
@@ -297,8 +297,7 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 		AdditionalProperties: bool2bytes(r.AllowAdditionalProperties),
 	}
 
-	packageName := getPackageNameFromPath(t.PkgPath())
-	definitions[packageName+"."+t.Name()] = st
+	definitions[getDefinitionKeyFromType(t)] = st
 	r.reflectStructFields(st, definitions, t)
 	r.addSubschemasForConditionalCases(st, definitions, t)
 
