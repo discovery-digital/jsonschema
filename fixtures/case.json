@@ -37,8 +37,7 @@
                         }
                     },
                     "then": {
-                        "$ref": "#/definitions/testmodels.BoolPayload",
-                        "$schema": "http://json-schema.org/draft-07/schema#"
+                        "$ref": "#/definitions/testmodels.BoolPayload"
                     }
                 },
                 {
@@ -61,8 +60,7 @@
                         }
                     },
                     "then": {
-                        "$ref": "#/definitions/testmodels.IntPayload",
-                        "$schema": "http://json-schema.org/draft-07/schema#"
+                        "$ref": "#/definitions/testmodels.IntPayload"
                     }
                 },
                 {
@@ -85,8 +83,7 @@
                         }
                     },
                     "then": {
-                        "$ref": "#/definitions/testmodels.StringPayload",
-                        "$schema": "http://json-schema.org/draft-07/schema#"
+                        "$ref": "#/definitions/testmodels.StringPayload"
                     }
                 }
             ],

@@ -1,0 +1,21 @@
+{
+  "$ref": "#/definitions/testmodels.TestFamilyMember",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "testmodels.TestFamilyMember": {
+      "additionalProperties": false,
+      "properties": {
+        "children": {
+          "items": {
+            "$ref": "#/definitions/testmodels.TestFamilyMember"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "children"
+      ],
+      "type": "object"
+    }
+  }
+}
