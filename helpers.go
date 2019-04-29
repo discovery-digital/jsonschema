@@ -82,6 +82,11 @@ func getPackageNameFromPath(path string) string {
 	return pathSlices[len(pathSlices)-1]
 }
 
+func getDefinitionKeyFromType(t reflect.Type) string {
+	packageName := getPackageNameFromPath(t.PkgPath())
+	return packageName + "." + t.Name()
+}
+
 // bool2bytes serializes bool to JSON
 func bool2bytes(val bool) []byte {
 	if val {

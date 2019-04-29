@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
     "testmodels.Desktop": {
       "additionalProperties": false,
@@ -29,8 +30,7 @@
           ]
         },
         "hardware": {
-          "$ref": "#/definitions/testmodels.Hardware",
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "$ref": "#/definitions/testmodels.Hardware"
         },
         "language": {
           "pattern": "\\S+",
@@ -50,11 +50,9 @@
     "testmodels.Hardware": {
       "additionalProperties": false,
       "oneOf": [{
-        "$ref": "#/definitions/testmodels.Laptop",
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$ref": "#/definitions/testmodels.Laptop"
       }, {
-        "$ref": "#/definitions/testmodels.Desktop",
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$ref": "#/definitions/testmodels.Desktop"
       }],
       "properties": {
         "brand": {
@@ -101,10 +99,8 @@
     }
   },
   "oneOf": [{
-    "$ref": "#/definitions/testmodels.Tester",
-    "$schema": "http://json-schema.org/draft-07/schema#"
+    "$ref": "#/definitions/testmodels.Tester"
   }, {
-    "$ref": "#/definitions/testmodels.Developer",
-    "$schema": "http://json-schema.org/draft-07/schema#"
+    "$ref": "#/definitions/testmodels.Developer"
   }]
 }

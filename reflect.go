@@ -142,8 +142,11 @@ func (r *Reflector) ReflectFromType(t reflect.Type) *Schema {
 		return &Schema{Type: st, Definitions: definitions}
 	}
 
+	rootType := r.reflectTypeToSchema(definitions, t)
+	rootType.Version = Version
+
 	s := &Schema{
-		Type:        r.reflectTypeToSchema(definitions, t),
+		Type:        rootType,
 		Definitions: definitions,
 	}
 	return s
@@ -184,8 +187,9 @@ var maxItemsType = reflect.TypeOf((*maxItems)(nil)).Elem()
 
 func (r *Reflector) reflectTypeToSchema(definitions Definitions, t reflect.Type) (schema *Type) {
 	// Already added to definitions?
-	if _, ok := definitions[t.Name()]; ok {
-		return &Type{Ref: "#/definitions/" + getPackageNameFromPath(t.PkgPath()) + "." + t.Name()}
+	definitionsKey := getDefinitionKeyFromType(t)
+	if _, ok := definitions[definitionsKey]; ok {
+		return &Type{Ref: "#/definitions/" + definitionsKey}
 	}
 
 	// jsonpb will marshal protobuf enum options as either strings or integers.
@@ -309,15 +313,12 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 		tagPrecedence:        map[string]reflect.StructTag{},
 	}
 
-	packageName := getPackageNameFromPath(t.PkgPath())
-	definitions[packageName+"."+t.Name()] = st
+	definitionsKey := getDefinitionKeyFromType(t)
+	definitions[definitionsKey] = st
 	r.reflectStructFields(st, definitions, t)
 	r.addSubschemasForConditionalCases(st, definitions, t)
 
-	return &Type{
-		Version: Version,
-		Ref:     "#/definitions/" + packageName + "." + t.Name(),
-	}
+	return &Type{Ref: "#/definitions/" + definitionsKey}
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {

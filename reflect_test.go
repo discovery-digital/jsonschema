@@ -29,7 +29,7 @@ var schemaGenerationTests = []testSet{
 	{&jsonschema.Reflector{}, "fixtures/case.json", testmodels.ExampleCase{}},
 	{&jsonschema.Reflector{}, "fixtures/case_without_order.json", testmodels.ExampleCaseWithoutOrder{}},
 	{&jsonschema.Reflector{}, "fixtures/test_min_max_items.json", testmodels.SliceTestType{}},
-	{&jsonschema.Reflector{AllowAdditionalProperties: true}, "fixtures/no_duplicate_fields_and_struct_precedence_over_embedded.json", testmodels.Root{}},
+	{&jsonschema.Reflector{}, "fixtures/test_recursion.json", testmodels.TestFamilyMember{}},
 }
 
 func TestSchemaGeneration(t *testing.T) {

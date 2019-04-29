@@ -5,8 +5,7 @@
     "testmodels.Application": {
       "additionalProperties": false,
       "else": {
-        "$ref": "#/definitions/testmodels.MobileApp",
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$ref": "#/definitions/testmodels.MobileApp"
       },
       "if": {
         "properties": {
@@ -22,8 +21,7 @@
       },
       "required": ["type"],
       "then": {
-        "$ref": "#/definitions/testmodels.WebApp",
-        "$schema": "http://json-schema.org/draft-07/schema#"
+        "$ref": "#/definitions/testmodels.WebApp"
       },
       "type": "object"
     },

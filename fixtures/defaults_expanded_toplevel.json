@@ -50,8 +50,7 @@
           "type": "array"
         },
         "grand": {
-          "$ref": "#/definitions/testmodels.GrandfatherType",
-          "$schema": "http://json-schema.org/draft-07/schema#"
+          "$ref": "#/definitions/testmodels.GrandfatherType"
         },
         "id": {
           "type": "integer"
@@ -152,8 +151,7 @@
       "type": "array"
     },
     "grand": {
-      "$ref": "#/definitions/testmodels.GrandfatherType",
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "$ref": "#/definitions/testmodels.GrandfatherType"
     },
     "id": {
       "type": "integer"
