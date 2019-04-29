@@ -46,6 +46,8 @@ type SchemaSwitch struct {
 
 var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
 
+var orderList = []string{"bool", "int", "string"}
+
 // Appends jsonschema rules from Case interface to the jsonschema for the struct that implements them
 func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t reflect.Type) {
 	if st == nil {
@@ -57,18 +59,17 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 
 	if t.Implements(schemaCaseType) {
 		schemaSwitch := nonNilPointer.(schemaCase).Case()
+		if len(schemaSwitch.Order) == 0 {
+			schemaSwitch.Order = orderList
+		}
 		st.OneOf = r.reflectCases(definitions, schemaSwitch)
 	}
 }
 
 func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
 	casesList := make([]*Type, 0)
-	if len(sc.Order) == 0 {
-		sc.Order = append(sc.Order, "bool")
-		sc.Order = append(sc.Order, "int")
-		sc.Order = append(sc.Order, "string")
-	}
-	for _, key := range sc.Order {
+	order := sc.Order
+	for _, key := range order {
 		t := &Type{}
 		t.If = &Type{
 			Properties: map[string]*Type{
