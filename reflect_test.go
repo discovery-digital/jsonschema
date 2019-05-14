@@ -27,7 +27,6 @@ var schemaGenerationTests = []testSet{
 	{&jsonschema.Reflector{}, "fixtures/test_versioned_packages.json", testmodels.TestVersionedPackages{}},
 	{&jsonschema.Reflector{}, "fixtures/if_then_else.json", testmodels.Application{}},
 	{&jsonschema.Reflector{}, "fixtures/case.json", testmodels.ExampleCase{}},
-	{&jsonschema.Reflector{}, "fixtures/case_without_order.json", testmodels.ExampleCaseWithoutOrder{}},
 	{&jsonschema.Reflector{}, "fixtures/test_min_max_items.json", testmodels.SliceTestType{}},
 	{&jsonschema.Reflector{}, "fixtures/test_recursion.json", testmodels.TestFamilyMember{}},
 }
