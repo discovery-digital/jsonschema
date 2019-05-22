@@ -3,12 +3,13 @@ package jsonschema_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/discovery-digital/jsonschema"
-	"github.com/discovery-digital/jsonschema/internal/testmodels"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/discovery-digital/jsonschema"
+	"github.com/discovery-digital/jsonschema/internal/testmodels"
 )
 
 type testSet struct {

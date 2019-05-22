@@ -23,12 +23,17 @@ type BoolPayload struct {
 
 func (ex ExampleCase) Case() jsonschema.SchemaSwitch {
 	cases := make(map[string]interface{})
+	order := []string{}
 	cases["bool"] = BoolPayload{}
+	order = append(order, "bool")
 	cases["int"] = IntPayload{}
+	order = append(order, "int")
 	cases["string"] = StringPayload{}
+	order = append(order, "string")
 
 	return jsonschema.SchemaSwitch{
 		ByField: "type",
 		Cases:   cases,
+		Order:   order,
 	}
 }

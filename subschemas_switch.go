@@ -39,10 +39,13 @@ type SchemaSwitch struct {
 	ByField string
 	// Each key = the value for the field being evaluated (ex: "turtle")
 	// Each value = the struct that holds the jsonschema tags to validate against when it is that value (ex: Turtle{})
-	Cases   map[string]interface{}
+	Cases map[string]interface{}
+	// Order = Elements present based on insertion oreder
+	Order []string
 }
 
 var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
+
 
 // Appends jsonschema rules from Case interface to the jsonschema for the struct that implements them
 func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t reflect.Type) {
@@ -60,17 +63,23 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 }
 
 func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
+	//Build order when not provided my the user of this library
+	if len(sc.Order) == 0 {
+		for key := range sc.Cases{
+			sc.Order = append(sc.Order,key)
+		}
+	}
 	casesList := make([]*Type, 0)
-	for key, value := range sc.Cases {
+	for _, value := range sc.Order {
 		t := &Type{}
 		t.If = &Type{
 			Properties: map[string]*Type{
 				sc.ByField: &Type{
-					Enum: []interface{}{key},
+					Enum: []interface{}{value},
 				},
 			},
 		}
-		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(value))
+		t.Then = r.reflectTypeToSchema(definitions, reflect.TypeOf(sc.Cases[value]))
 		t.Else = t.If
 		casesList = append(casesList, t)
 	}

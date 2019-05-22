@@ -108,7 +108,7 @@
           "type": "string"
         }
       },
-      "required": ["some_base_property", "grand", "SomeUntaggedBaseProperty", "id", "name", "nickname", "TestFlag", "age", "email"],
+      "required": [ "id", "name", "nickname", "TestFlag", "age", "email", "some_base_property", "grand", "SomeUntaggedBaseProperty"],
       "type": "object"
     }
   },
@@ -229,6 +229,6 @@
       "type": "string"
     }
   },
-  "required": ["some_base_property", "grand", "SomeUntaggedBaseProperty", "id", "name", "nickname", "TestFlag", "age", "email"],
+  "required": ["id", "name", "nickname", "TestFlag", "age", "email", "some_base_property", "grand", "SomeUntaggedBaseProperty"],
   "type": "object"
 }

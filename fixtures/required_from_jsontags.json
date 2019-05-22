@@ -131,7 +131,7 @@
           "format": "uri"
         }
       },
-      "required": ["SomeUntaggedBaseProperty", "id", "name", "nickname", "photo"],
+      "required": ["id", "name", "nickname", "photo", "SomeUntaggedBaseProperty" ],
       "type": "object"
     }
   }
