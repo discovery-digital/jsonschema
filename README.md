@@ -705,6 +705,8 @@ type SchemaSwitch struct {
 	// Each key = the value for the field being evaluated (ex: "turtle")
 	// Each value = the struct that holds the jsonschema tags to validate against when it is that value (ex: Turtle{})
 	Cases   map[string]interface{}
+	// Order - the fields from `Cases` can be provided here to guarantee output in specified order, otherwise this will be seeded internally
+	Order []string
 }
 ```
 
