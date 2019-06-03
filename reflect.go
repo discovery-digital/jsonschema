@@ -327,14 +327,15 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 	orderArray := []structOrder{}
 	for i := 0; i < t.NumField(); i++ {
 		f := t.Field(i)
-		// if not Anonymous and tag not present, insert
-		// else check if present and assign propert to current field
+
+		// Prevent duplicate jsonschema name declarations when using embeds
+		name, required := r.reflectFieldName(f, t)
 		if !f.Anonymous {
-			_, ok := st.tagPrecedence[f.Name]
+			_, ok := st.tagPrecedence[name]
 			if !ok {
-				st.tagPrecedence[f.Name] = f.Tag
+				st.tagPrecedence[name] = f.Tag
 			} else {
-				f.Tag = st.tagPrecedence[f.Name]
+				f.Tag = st.tagPrecedence[name]
 			}
 		}
 		// anonymous and exported type should be processed recursively
@@ -346,7 +347,6 @@ func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t ref
 			continue
 		}
 
-		name, required := r.reflectFieldName(f, t)
 		if name == "" {
 			continue
 		}
