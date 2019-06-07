@@ -1,0 +1,28 @@
+{
+  "$ref": "#/definitions/testmodels.Arrays",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "testmodels.Arrays": {
+      "additionalProperties": false,
+      "properties": {
+        "pets": {
+          "items": {
+            "type": "integer"
+          },
+          "oneOf": [
+            {
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "pets"
+      ],
+      "type": "object"
+    }
+  }
+}
