@@ -525,6 +525,16 @@ func (t *Type) arrayKeywords(tags []string) {
 			case "uniqueItems":
 				t.UniqueItems = true
 			}
+		} else {
+			name := nameValue[0]
+			switch name {
+			case "allowNull":
+				t.OneOf = []*Type{
+					{Type: t.Type},
+					{Type: "null"},
+				}
+				t.Type = ""
+			}
 		}
 	}
 }

@@ -30,6 +30,7 @@ var schemaGenerationTests = []testSet{
 	{&jsonschema.Reflector{}, "fixtures/test_min_max_items.json", testmodels.SliceTestType{}},
 	{&jsonschema.Reflector{}, "fixtures/test_recursion.json", testmodels.TestFamilyMember{}},
 	{&jsonschema.Reflector{}, "fixtures/duplicate_embedded_fields.json", testmodels.Root{}},
+	{&jsonschema.Reflector{}, "fixtures/arrays.json", testmodels.Arrays{}},
 }
 
 func TestSchemaGeneration(t *testing.T) {
