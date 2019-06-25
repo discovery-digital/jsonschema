@@ -65,7 +65,7 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 }
 
 func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
-	//Build order when not provided my the user of this library
+	//Build order when not provided my the user of this library,sort the keys to always keep in order
 	if len(sc.Order) == 0 {
 		for key := range sc.Cases {
 			sc.Order = append(sc.Order, key)
