@@ -1,6 +1,9 @@
 package jsonschema
 
-import "reflect"
+import (
+	"reflect"
+	"sort"
+)
 
 // Case() isn't an official jsonschema rule but a shorthand to simulate switch logic (without default)
 // This allows us to then evaluate a field and validate different schema based on the value of the field
@@ -46,7 +49,6 @@ type SchemaSwitch struct {
 
 var schemaCaseType = reflect.TypeOf((*schemaCase)(nil)).Elem()
 
-
 // Appends jsonschema rules from Case interface to the jsonschema for the struct that implements them
 func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t reflect.Type) {
 	if st == nil {
@@ -65,9 +67,10 @@ func (r *Reflector) addSubschemasForSwitch(st *Type, definitions Definitions, t 
 func (r *Reflector) reflectCases(definitions Definitions, sc SchemaSwitch) []*Type {
 	//Build order when not provided my the user of this library
 	if len(sc.Order) == 0 {
-		for key := range sc.Cases{
-			sc.Order = append(sc.Order,key)
+		for key := range sc.Cases {
+			sc.Order = append(sc.Order, key)
 		}
+		sort.Strings(sc.Order)
 	}
 	casesList := make([]*Type, 0)
 	for _, value := range sc.Order {
