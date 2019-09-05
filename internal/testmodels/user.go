@@ -62,7 +62,7 @@ type TestUser struct {
 
 	// Tests for jsonpb enum support
 	Feeling ProtoEnum `json:"feeling,omitempty"`
-	Age     int       `json:"age" jsonschema:"minimum=18,maximum=120,exclusiveMaximum=true,exclusiveMinimum=true"`
+	Age     int       `json:"age" jsonschema:"exclusiveMaximum=120,exclusiveMinimum=18"`
 	Email   string    `json:"email" jsonschema:"format=email"`
 
 	SecretNumber      int     `json:"secret_number,omitempty" jsonschema:"enum=9|30|28|52"`

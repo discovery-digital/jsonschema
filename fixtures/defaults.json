@@ -22,10 +22,8 @@
           "type": "boolean"
         },
         "age": {
-          "exclusiveMaximum": true,
-          "exclusiveMinimum": true,
-          "maximum": 120,
-          "minimum": 18,
+          "exclusiveMaximum": 120,
+          "exclusiveMinimum": 18,
           "type": "integer"
         },
         "birth_date": {
