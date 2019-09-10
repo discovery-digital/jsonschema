@@ -36,9 +36,9 @@ type Type struct {
 	// RFC draft-wright-json-schema-validation-00, section 5
 	MultipleOf           int              `json:"multipleOf,omitempty"`           // section 5.1
 	Maximum              int              `json:"maximum,omitempty"`              // section 5.2
-	ExclusiveMaximum     bool             `json:"exclusiveMaximum,omitempty"`     // section 5.3
+	ExclusiveMaximum     int              `json:"exclusiveMaximum,omitempty"`     // section 5.3
 	Minimum              int              `json:"minimum,omitempty"`              // section 5.4
-	ExclusiveMinimum     bool             `json:"exclusiveMinimum,omitempty"`     // section 5.5
+	ExclusiveMinimum     int              `json:"exclusiveMinimum,omitempty"`     // section 5.5
 	MaxLength            int              `json:"maxLength,omitempty"`            // section 5.6
 	MinLength            int              `json:"minLength,omitempty"`            // section 5.7
 	Pattern              string           `json:"pattern,omitempty"`              // section 5.8
@@ -317,8 +317,8 @@ func (r *Reflector) reflectStruct(definitions Definitions, t reflect.Type) *Type
 	definitions[definitionsKey] = st
 	r.reflectStructFields(st, definitions, t)
 	r.addSubschemasForConditionalCases(st, definitions, t)
-
 	return &Type{Ref: "#/definitions/" + definitionsKey}
+
 }
 
 func (r *Reflector) reflectStructFields(st *Type, definitions Definitions, t reflect.Type) {
@@ -453,10 +453,10 @@ func (t *Type) numbericKeywords(tags []string) {
 				i, _ := strconv.Atoi(val)
 				t.Maximum = i
 			case "exclusiveMaximum":
-				b, _ := strconv.ParseBool(val)
+				b, _ := strconv.Atoi(val)
 				t.ExclusiveMaximum = b
 			case "exclusiveMinimum":
-				b, _ := strconv.ParseBool(val)
+				b, _ := strconv.Atoi(val)
 				t.ExclusiveMinimum = b
 			case "enum":
 				enum := strings.Split(val, "|")
